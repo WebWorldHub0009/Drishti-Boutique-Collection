@@ -9,7 +9,7 @@ import {
   FaStoreAlt,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
-import img1 from "../assets/images/slider/saree.JPG";
+import img1 from "../assets/images/slider/saree.jpg";
 import img2 from "../assets/images/slider/lehenga.jpg";
 import img3 from "../assets/images/slider/saree2.jpg";
 import img4 from "../assets/images/slider/saree3.jpg";
