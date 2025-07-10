@@ -17,7 +17,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import VisitorCounter from "./VisitorCounter";
 import Translator from "./Translator";
-import logo from "../assets/images/logo4.png";
+import logo from "../assets/images/f.png";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 50 },
@@ -46,7 +46,7 @@ export default function Footer() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 text-sm z-10 relative">
         {/* About */}
         <div className="flex flex-col space-y-3">
-          <img src={logo} alt="Drishti Boutique Logo" className="w-[80px] md:w-[120px]" />
+          <img src={logo} alt="Drishti Boutique Logo" className="w-[80px] md:w-[150px]" />
           <h4 className="font-semibold mb-2">About Drishti Boutique</h4>
           <p className="leading-relaxed">
             Drishti Boutique brings you premium ethnic and fusion wear on rent — from elegant lehengas and sarees to trendy western dresses.
@@ -66,15 +66,15 @@ export default function Footer() {
 
         {/* Quick Links */}
         <div>
-          <h4 className="font-semibold mb-4">Quick Links</h4>
+          <h4 className="font-bold text-2xl mb-4">Quick Links</h4>
           <ul className="space-y-2">
             {[
               ["Home", "/", <FaHome />],
-              ["Trending", "/trending", <FaFire />],
+              ["Royal-Pick", "/royal-pick", <FaFire />],
               ["Gallery", "/gallery", <FaImages />],
               ["About", "/about", <FaInfoCircle />],
               ["Contact", "/contact", <FaPhoneAlt />],
-              ["Documents", "/documents", <FaFileAlt />],
+            
             ].map(([text, link, icon], i) => (
               <li key={i}>
                 <Link
@@ -87,7 +87,7 @@ export default function Footer() {
             ))}
           </ul>
 
-          <h4 className="mt-6 font-semibold">Emails</h4>
+          <h4 className="mt-6 font-bold text-2xl">Emails</h4>
           <ul className="mt-2 space-y-2">
             {[
               "Info@drishtiboutiquecollection.com",
@@ -108,7 +108,7 @@ export default function Footer() {
 
         {/* Our Collection */}
         <div>
-          <h4 className="font-semibold mb-4">Our Collection</h4>
+          <h4 className="font-bold text-2xl mb-4">Our Collection</h4>
           <ul className="space-y-2">
             {[
               "Designer Suits",
@@ -132,7 +132,7 @@ export default function Footer() {
 
         {/* Address & Socials */}
         <div>
-          <h4 className="font-semibold mb-4">Our Address</h4>
+          <h4 className="font-bold text-2xl mb-4">Our Address</h4>
           <address className="not-italic leading-relaxed mb-4">
             Shop No F, 1 Gali no 8<br />
             Pipal Wala Rd, opp. Panchsheel hospital<br />

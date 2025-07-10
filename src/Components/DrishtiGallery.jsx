@@ -1,7 +1,7 @@
 import React from "react";
-import imgLeft from "../assets/images/slider/western.jpg";
-import imgCenter from "../assets/images/slider/saree3.jpg";
-import imgRight from "../assets/images/slider/western2.jpg";
+import imgLeft from "../assets/images/gallery/l18.jpg";
+import imgCenter from "../assets/images/gallery/l29.jpg";
+import imgRight from "../assets/images/gallery/l33.jpg";
 import { Link } from "react-router-dom";
 
 const DrishtiGallery = () => {
@@ -33,7 +33,7 @@ const DrishtiGallery = () => {
               className="w-full h-[280px] sm:h-[320px] object-cover rounded-xl hover:scale-105 transition-transform duration-500"
             />
           </div>
-          <p className="text-[15px] md:text-base text-[#B22222]/90 max-w-xs mt-4">
+          <p className="text-[15px] md:text-base text-[#B22222]/90 max-w-xs ">
             Lightweight fabrics blended with style — perfect for celebrations, gatherings, or a quiet evening.
           </p>
         </div>
@@ -58,7 +58,7 @@ const DrishtiGallery = () => {
             <img
               src={imgRight}
               alt="Festive Elegance"
-              className="w-full h-[280px] sm:h-[320px] object-cover rounded-xl hover:scale-105 transition-transform duration-500"
+              className="w-full h-[300px] sm:h-[350px] object-cover rounded-xl hover:scale-105 transition-transform duration-500"
             />
           </div>
         </div>
@@ -66,7 +66,7 @@ const DrishtiGallery = () => {
 
       {/* Floating View More Button */}
       <div className="relative z-20 mt-16 flex justify-center">
-        <Link to="/trending">
+        <Link to="/gallery">
           <button className="bg-[#B22222] text-[#FAFAF0] px-6 py-3 rounded-full text-sm md:text-base font-semibold shadow-lg hover:bg-[#D4AF37] hover:text-[#FAFAF0] transition-transform hover:scale-105">
             View More
           </button>

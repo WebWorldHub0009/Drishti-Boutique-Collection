@@ -11,7 +11,6 @@ export default function OwnerSection() {
 
   return (
     <section className="relative bg-gradient-to-br from-[#FAFAF0] via-[#F5F5DC] to-white py-20 px-6 sm:px-12 overflow-hidden font-['Libre_Franklin']">
-
       {/* Soft moving background pattern */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] opacity-10 animate-pulse"></div>
 
@@ -55,6 +54,14 @@ export default function OwnerSection() {
         {/* Signature effect */}
         <p className="text-[#D4AF37]/70 italic text-sm sm:text-base font-['Great_Vibes'] mt-1">
           ~ Founder of Drishti Boutique ~
+        </p>
+
+        {/* Owner description */}
+        <p className="mt-4 max-w-2xl text-sm sm:text-base text-[#B22222]/80 leading-relaxed">
+          Yogesh Leela Pal is a visionary entrepreneur with a deep passion for fashion and design.
+          With an unwavering commitment to delivering affordable luxury, he has built Drishti Boutique
+          into a trusted name for premium ethnic and fusion wear. His dedication to quality, elegance,
+          and customer satisfaction continues to inspire the team and delight clients across the region.
         </p>
 
         {/* Decorative separator */}

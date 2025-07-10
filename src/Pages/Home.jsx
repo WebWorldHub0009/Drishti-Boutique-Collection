@@ -4,6 +4,7 @@ import DrishtiServices from '../Components/DrishtiServices'
 import WhyChooseUs from '../Components/WhyChooseUs'
 import DrishtiGallery from '../Components/DrishtiGallery'
 import OwnerSection from '../Components/OwnerSection'
+import MostWantedProducts from '../Components/MostWantedProduct'
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
     <DrishtiServices/>
     <WhyChooseUs/>
     <DrishtiGallery/>
+    <MostWantedProducts/>
     <OwnerSection/>
     </>
   )
