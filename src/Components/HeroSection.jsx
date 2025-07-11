@@ -80,7 +80,7 @@ export default function HeroSection() {
       ))}
 
       {/* Arrows */}
-      {/* <div className="absolute bottom-6 right-6 flex gap-3 z-30">
+      <div className="absolute bottom-6 right-6 flex gap-3 z-30">
         <button
           onClick={() =>
             setCurrent((prev) => (prev - 1 + slides.length) % slides.length)
@@ -95,7 +95,7 @@ export default function HeroSection() {
         >
           <FiArrowRight size={20} />
         </button>
-      </div> */}
+      </div>
     </section>
   );
 }

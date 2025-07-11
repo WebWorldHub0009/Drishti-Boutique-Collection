@@ -48,7 +48,7 @@ export default function OwnerSection() {
 
         {/* Owner name */}
         <h2 className="mt-4 text-2xl sm:text-3xl md:text-4xl font-bold text-[#B22222]">
-          Yogesh Leela Pal
+          Yogesh Leena Pal
         </h2>
 
         {/* Signature effect */}
