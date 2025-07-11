@@ -32,7 +32,7 @@ export default function Navbar() {
   return (
     <>
       {/* Top Bar */}
-      <div className="w-full bg-[#B22222] text-[#FAFAF0] text-[9px] py-[3px] px-4 flex flex-wrap justify-center items-center gap-4 font-libre text-center tracking-wide">
+      <div className="w-full bg-[#B22222] text-[#FAFAF0] text-[7px] py-[6px] px-3 flex flex-wrap justify-center items-center gap-4 font-libre text-center tracking-wide">
         <a
           href="mailto:Info@drishtiboutiquecollection.com"
           className="flex items-center font-bold gap-1 hover:underline transition"
@@ -61,7 +61,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
           {/* Logo */}
           <Link to="/" onClick={() => setIsOpen(false)}>
-            <img src={logo} alt="Drishti Boutique" className="h-14 md:h-16" />
+            <img src={logo} alt="Drishti Boutique" className="h-14 md:h-16 relative right-5 md:right-4" />
           </Link>
 
           {/* Desktop Links */}

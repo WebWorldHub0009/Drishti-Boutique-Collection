@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
@@ -25,7 +25,9 @@ const products = [
 ];
 
 export default function ProductSlider() {
-  const [sliderRef] = useKeenSlider({
+  const navigate = useNavigate();
+  const timer = useRef();
+  const [sliderRef, slider] = useKeenSlider({
     loop: true,
     slides: {
       perView: 1,
@@ -41,11 +43,19 @@ export default function ProductSlider() {
     },
   });
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (!slider) return;
+
+    timer.current = setInterval(() => {
+      slider.current?.next();
+    }, 3000); // every 3 seconds
+
+    return () => clearInterval(timer.current);
+  }, [slider]);
 
   return (
     <section className="py-8 bg-[#fffaf7]">
-       <div className="text-center mb-14">
+      <div className="text-center mb-14">
         <p className="text-xs uppercase tracking-widest text-[#B22222] mb-2">Drishti’s Handpicked</p>
         <h2 className="text-4xl md:text-5xl font-[Great_Vibes] text-[#B22222]">
           Most Loved Collection
@@ -68,25 +78,16 @@ export default function ProductSlider() {
                 alt={product.label}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-
-              {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#00000099] to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
-
-              {/* Product Title */}
               <div className="absolute bottom-5 left-5 bg-white/90 text-[#B22222] px-4 py-1 text-sm font-semibold rounded-full shadow-md">
                 {product.label}
               </div>
-
-              {/* Arrow Button */}
               <div className="absolute bottom-5 right-5">
                 <button
-                  onClick={() => {
-                    console.log("Navigating to:", product.route); // Debug
-                    navigate(product.route);
-                  }}
+                  onClick={() => navigate(product.route)}
                   className="bg-white p-3 rounded-full shadow-md hover:bg-[#F5F5DC] transition"
                 >
-                  <FaArrowRight className="text-[#B22222] cursor-pointer  text-sm" />
+                  <FaArrowRight className="text-[#B22222] text-sm" />
                 </button>
               </div>
             </div>
