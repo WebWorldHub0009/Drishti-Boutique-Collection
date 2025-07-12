@@ -32,29 +32,32 @@ export default function Navbar() {
   return (
     <>
       {/* Top Bar */}
-      <div className="w-full bg-[#B22222] text-[#FAFAF0] text-[7px] py-[6px] px-3 flex flex-wrap justify-center items-center gap-4 font-libre text-center tracking-wide">
-        <a
-          href="mailto:Info@drishtiboutiquecollection.com"
-          className="flex items-center font-bold gap-1 hover:underline transition"
-        >
-          <FiMail className="text-sm" />
-          Info@drishtiboutiquecollection.com
-        </a>
-        <a
-          href="tel:+919811676755"
-          className="flex items-center gap-1 font-bold hover:underline transition"
-        >
-          <FiPhone className="text-sm" />
-          +91 9811676755
-        </a>
-        <a
-          href="tel:+919971446909"
-          className="flex items-center font-bold gap-1 hover:underline transition"
-        >
-          <FiPhone className="text-sm" />
-          +91 9971446909
-        </a>
-      </div>
+     <div className="w-full bg-[#B22222] text-[#FAFAF0] py-1 px-3 flex flex-wrap justify-center items-center gap-x-6 gap-y-1 text-center font-libre text-sm md:text-base">
+  <a
+    href="mailto:Info@drishtiboutiquecollection.com"
+    className="flex items-center gap-1 font-semibold hover:underline transition"
+  >
+    <FiMail className="text-base" />
+    Info@drishtiboutiquecollection.com
+  </a>
+
+  <a
+    href="tel:+919811676755"
+    className="flex items-center gap-1 font-semibold hover:underline transition"
+  >
+    <FiPhone className="text-base" />
+    +91 9811676755
+  </a>
+
+  <a
+    href="tel:+919971446909"
+    className="flex items-center gap-1 font-semibold hover:underline transition"
+  >
+    <FiPhone className="text-base" />
+    +91 9971446909
+  </a>
+</div>
+
 
       {/* Main Navbar */}
       <nav className="w-full bg-[#FAFAF0] shadow-md font-libre">
