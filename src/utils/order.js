@@ -1,5 +1,6 @@
 // utils/order.js
 import axios from "axios";
+import {baseUrls} from "../baseUrls.js"
 
 export const buyNow = async (item) => {
     try {
@@ -10,7 +11,7 @@ export const buyNow = async (item) => {
             return { success: false, message: "Name and phone are required" };
         }
 
-        const res = await axios.post("http://localhost:5000/api/orders", {
+        const res = await axios.post(`${baseUrls}/api/orders`, {
             productId: item._id,
             productTitle: item.title,
             price: item.price,
