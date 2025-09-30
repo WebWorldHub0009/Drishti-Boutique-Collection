@@ -1,4 +1,4 @@
-// BeautyPage.jsx
+// src/Pages/BeautyPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,19 +7,27 @@ import HeroBG from "../assets/images/gallery/bg.jpg";
 import { baseUrls } from "../baseUrls";
 
 const BeautyPage = ({ addToCart }) => {
-    const { category } = useParams(); // URL se category fetch karte hain
+    const { category } = useParams();
     const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [modal, setModal] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const sectionRef = useRef(null);
     const navigate = useNavigate();
 
-    // ✅ Fetch data dynamically based on category
+    // ✅ Fetch data dynamically
     useEffect(() => {
-        fetch(`${baseUrls}/api/beauty/${category}`)
-            .then((res) => res.json())
+        setLoading(true);
+        setError(null);
+        fetch(`${ baseUrls } /api/beauty / ${ category } `)
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to fetch items");
+                return res.json();
+            })
             .then((data) => setItems(data))
-            .catch((err) => console.error("Error fetching beauty items:", err));
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
     }, [category]);
 
     const scrollToSection = () => sectionRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,7 +49,7 @@ const BeautyPage = ({ addToCart }) => {
             <section className="relative h-[80vh] w-full overflow-hidden">
                 <div
                     className="absolute inset-0 bg-cover bg-center scale-110"
-                    style={{ backgroundImage: `url(${HeroBG})` }}
+                    style={{ backgroundImage: `url(${ HeroBG })` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70" />
                 <div className="relative z-10 flex items-center justify-center h-full text-center text-white px-6">
@@ -82,49 +90,57 @@ const BeautyPage = ({ addToCart }) => {
                     <p className="italic text-[#444]">"Gentle on skin, divine in fragrance."</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                    {items.map((item, idx) => (
-                        <motion.div
-                            key={idx}
-                            onClick={() => setModal(item)}
-                            className="overflow-hidden rounded-3xl cursor-pointer bg-white shadow-lg border border-[#B22222]/20 group relative"
-                            initial={{ opacity: 0, y: 40 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="relative overflow-hidden h-64 bg-[#fffaf3] flex items-center justify-center">
-                                <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                                />
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleAddToCart(item);
-                                    }}
-                                    className="absolute top-3 right-3 bg-[#B22222]/80 text-white p-2 rounded-full shadow-lg hover:bg-[#98131f] transition"
-                                >
-                                    <FaShoppingCart />
-                                </button>
-                            </div>
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-[#B22222] mb-1">{item.title}</h3>
-                                <p className="text-sm text-gray-700 line-clamp-3">{item.description}</p>
-                                <p className="text-[#D4AF37] font-bold mt-2">₹{item.price}</p>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setModal(item);
-                                    }}
-                                    className="mt-3 w-full bg-[#B22222] text-white py-2 rounded-full hover:bg-[#98131f] transition"
-                                >
-                                    View Details
-                                </button>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                {loading ? (
+                    <p className="text-center text-gray-500">Loading items...</p>
+                ) : error ? (
+                    <p className="text-center text-red-500">⚠ {error}</p>
+                ) : items.length === 0 ? (
+                    <p className="text-center text-gray-500">No products available in this category.</p>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                        {items.map((item, idx) => (
+                            <motion.div
+                                key={idx}
+                                onClick={() => setModal(item)}
+                                className="overflow-hidden rounded-3xl cursor-pointer bg-white shadow-lg border border-[#B22222]/20 group relative"
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                            >
+                                <div className="relative overflow-hidden h-64 bg-[#fffaf3] flex items-center justify-center">
+                                    <img
+                                        src={item.image}
+                                        alt={item.title}
+                                        className="max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleAddToCart(item);
+                                        }}
+                                        className="absolute top-3 right-3 bg-[#B22222]/80 text-white p-2 rounded-full shadow-lg hover:bg-[#98131f] transition"
+                                    >
+                                        <FaShoppingCart />
+                                    </button>
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="text-lg font-semibold text-[#B22222] mb-1">{item.title}</h3>
+                                    <p className="text-sm text-gray-700 line-clamp-3">{item.description}</p>
+                                    <p className="text-[#D4AF37] font-bold mt-2">₹{item.price}</p>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setModal(item);
+                                        }}
+                                        className="mt-3 w-full bg-[#B22222] text-white py-2 rounded-full hover:bg-[#98131f] transition"
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
             </section>
 
             {/* MODAL */}
@@ -197,3 +213,4 @@ const BeautyPage = ({ addToCart }) => {
 };
 
 export default BeautyPage;
+

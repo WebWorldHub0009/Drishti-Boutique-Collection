@@ -1,3 +1,4 @@
+// src/Pages/AdminCollection.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { baseUrls } from "../baseUrls";
@@ -22,7 +23,7 @@ function AdminCollection() {
 
     const token = localStorage.getItem("token");
 
-    // Fetch collection items
+    // ✅ Fetch items
     useEffect(() => {
         const fetchItems = async () => {
             try {
@@ -37,7 +38,7 @@ function AdminCollection() {
         fetchItems();
     }, [token]);
 
-    // Add or Update item
+    // ✅ Add / Update item
     const saveItem = async () => {
         if (!form.title || !form.description || !form.price || !form.category) {
             alert("Please fill all required fields!");
@@ -46,29 +47,22 @@ function AdminCollection() {
 
         const formData = new FormData();
         Object.entries(form).forEach(([key, value]) => {
-            if (key === "file" && value) {
-                formData.append("image", value);
-            } else if (key !== "preview" && key !== "file") {
-                formData.append(key, value);
-            }
+            if (key === "file" && value) formData.append("image", value);
+            else if (key !== "file" && key !== "preview") formData.append(key, value);
         });
 
         try {
             let res;
             if (editingId) {
-                res = await axios.put(
-                    `${baseUrls}/api/collection/${editingId}`,
-                    formData,
-                    { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-                );
+                res = await axios.put(`${baseUrls}/api/collection/${editingId}`, formData, {
+                    headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+                });
                 setItems(items.map((item) => (item._id === editingId ? res.data : item)));
                 setEditingId(null);
             } else {
-                res = await axios.post(
-                    `${baseUrls}/api/collection`,
-                    formData,
-                    { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-                );
+                res = await axios.post(`${baseUrls}/api/collection`, formData, {
+                    headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+                });
                 setItems([...items, res.data]);
             }
 
@@ -91,7 +85,6 @@ function AdminCollection() {
         }
     };
 
-    // Delete item
     const deleteItem = async (id) => {
         if (!window.confirm("Are you sure you want to delete this item?")) return;
         try {
@@ -100,11 +93,10 @@ function AdminCollection() {
             });
             setItems(items.filter((item) => item._id !== id));
         } catch (err) {
-            console.error("Error deleting collection item:", err);
+            console.error("Error deleting item:", err);
         }
     };
 
-    // Edit item
     const editItem = (item) => {
         setForm({
             category: item.category || "",
@@ -123,15 +115,11 @@ function AdminCollection() {
         setEditingId(item._id);
     };
 
-    // Handle file input change with preview
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            setForm({ ...form, file, preview: URL.createObjectURL(file) });
-        }
+        if (file) setForm({ ...form, file, preview: URL.createObjectURL(file) });
     };
 
-    // Group items by category
     const groupedCollections = items.reduce((acc, item) => {
         acc[item.category] = acc[item.category] || [];
         acc[item.category].push(item);
@@ -139,16 +127,16 @@ function AdminCollection() {
     }, {});
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow max-w-6xl mx-auto">
-            <h2 className="text-xl font-bold mb-4">Manage Collection</h2>
+        <div className="bg-white p-6 rounded-2xl shadow max-w-7xl mx-auto">
+            <h2 className="text-xl md:text-2xl font-bold mb-6">Manage Collection</h2>
 
-            {/* ✅ Category Selector */}
+            {/* Category */}
             <div className="mb-4">
                 <label className="mr-2 font-semibold">Select Category:</label>
                 <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full md:w-1/2"
                 >
                     <option value="">Select Category</option>
                     <option value="suit">Suit</option>
@@ -158,12 +146,11 @@ function AdminCollection() {
                     <option value="blouse">Designer Blouse</option>
                     <option value="gopidress">Gopi Dresses</option>
                     <option value="sarees">Party Wear Lehenga</option>
-
                 </select>
             </div>
 
             {/* Form Inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {["title", "description", "price", "fabric", "work", "dupatta", "occasions", "sizeFit", "customAlterations"].map((key) => (
                     <input
                         key={key}
@@ -175,59 +162,40 @@ function AdminCollection() {
                     />
                 ))}
 
-                {/* File input */}
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="border px-3 py-2 rounded-lg"
-                />
+                <input type="file" accept="image/*" onChange={handleFileChange} className="border px-3 py-2 rounded-lg" />
 
-                {/* Image preview */}
                 {form.preview && (
-                    <img
-                        src={form.preview}
-                        alt="Preview"
-                        className="w-40 h-40 object-cover rounded-lg mt-2"
-                    />
+                    <div className="flex justify-center md:justify-start mt-2">
+                        <img src={form.preview} alt="Preview" className="w-40 h-40 object-cover rounded-lg border" />
+                    </div>
                 )}
             </div>
 
             <button
                 onClick={saveItem}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 mb-6"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition mb-8"
             >
                 {editingId ? "Update Item" : "Add Item"}
             </button>
 
-            {/* List of items */}
+            {/* Collections */}
             {Object.keys(groupedCollections).map((category) => (
-                <div key={category} className="mb-6">
-                    <h3 className="text-lg font-semibold mb-2 capitalize">{category}</h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div key={category} className="mb-8">
+                    <h3 className="text-lg md:text-xl font-semibold mb-4 capitalize border-b pb-2">{category}</h3>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {groupedCollections[category].map((item) => (
                             <li
                                 key={item._id}
-                                className="border p-4 rounded-lg cursor-pointer hover:shadow-lg"
+                                className="border p-4 rounded-lg hover:shadow-md transition cursor-pointer"
                                 onClick={() => editItem(item)}
                             >
-                                <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="w-full h-40 object-cover rounded mb-2"
-                                />
+                                <img src={item.image} alt={item.title} className="w-full h-40 object-cover rounded mb-3" />
                                 <p className="font-bold">{item.title} - ₹{item.price}</p>
-                                <div className="flex justify-between mt-2">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); editItem(item); }}
-                                        className="text-green-500 hover:underline"
-                                    >
+                                <div className="flex justify-between mt-3">
+                                    <button onClick={(e) => { e.stopPropagation(); editItem(item); }} className="text-green-600 hover:underline">
                                         Edit
                                     </button>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); deleteItem(item._id); }}
-                                        className="text-red-500 hover:underline"
-                                    >
+                                    <button onClick={(e) => { e.stopPropagation(); deleteItem(item._id); }} className="text-red-600 hover:underline">
                                         Delete
                                     </button>
                                 </div>

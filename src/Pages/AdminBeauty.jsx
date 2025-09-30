@@ -1,4 +1,3 @@
-// src/pages/AdminBeauty.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseUrls } from "../baseUrls";
@@ -149,13 +148,13 @@ function AdminBeauty() {
             </div>
 
             {/* Form */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <input
                     type="text"
                     placeholder="Title"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 <input
@@ -163,7 +162,7 @@ function AdminBeauty() {
                     placeholder="Description"
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 <input
@@ -171,13 +170,13 @@ function AdminBeauty() {
                     placeholder="Price"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 <input
                     type="file"
                     onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 {form.image && (
@@ -193,7 +192,7 @@ function AdminBeauty() {
                     placeholder="Ingredients"
                     value={form.ingredients}
                     onChange={(e) => setForm({ ...form, ingredients: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 <input
@@ -201,7 +200,7 @@ function AdminBeauty() {
                     placeholder="Skin Type"
                     value={form.skinType}
                     onChange={(e) => setForm({ ...form, skinType: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 <input
@@ -209,7 +208,7 @@ function AdminBeauty() {
                     placeholder="Volume"
                     value={form.volume}
                     onChange={(e) => setForm({ ...form, volume: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 <input
@@ -217,19 +216,19 @@ function AdminBeauty() {
                     placeholder="Usage"
                     value={form.usage}
                     onChange={(e) => setForm({ ...form, usage: e.target.value })}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border px-3 py-2 rounded-lg w-full"
                 />
 
                 <button
                     onClick={saveItem}
-                    className="bg-blue-600 text-white py-2 rounded-lg mt-2"
+                    className="bg-blue-600 text-white py-2 rounded-lg mt-2 w-full"
                 >
                     {editingId ? "Update Item" : "Add Item"}
                 </button>
             </div>
 
             {/* Items List */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item) => (
                     <div key={item._id} className="border p-3 rounded-lg shadow">
                         {item.image && (
@@ -247,16 +246,16 @@ function AdminBeauty() {
                         {item.volume && <p>Volume: {item.volume}</p>}
                         {item.usage && <p>Usage: {item.usage}</p>}
 
-                        <div className="flex gap-2 mt-2">
+                        <div className="flex flex-wrap gap-2 mt-2">
                             <button
                                 onClick={() => editItem(item)}
-                                className="bg-yellow-500 text-white px-3 py-1 rounded"
+                                className="bg-yellow-500 text-white px-3 py-1 rounded w-full sm:w-auto"
                             >
                                 Edit
                             </button>
                             <button
                                 onClick={() => deleteItem(item._id)}
-                                className="bg-red-600 text-white px-3 py-1 rounded"
+                                className="bg-red-600 text-white px-3 py-1 rounded w-full sm:w-auto"
                             >
                                 Delete
                             </button>
