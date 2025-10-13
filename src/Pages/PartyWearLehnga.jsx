@@ -16,7 +16,7 @@ export default function DesignerSuit({ addToCart, category = "sarees", title = "
 
   useEffect(() => {
     axios
-      .get(`${baseUrls}/collection/${category}`)
+      .get(`${baseUrls}/api/collection/${category}`)
       .then((res) => setItems(res.data))
       .catch((err) => console.error(err));
   }, [category]);
