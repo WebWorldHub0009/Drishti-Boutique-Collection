@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import HeroBG from "../assets/images/gallery/bg.jpg"; // replace if needed
+import HeroBG from "../assets/images/gallery/bg.jpg";
 import { FaShoppingCart, FaWhatsapp } from "react-icons/fa";
 import { buyNow } from "../utils/order";
 import { baseUrls } from "../baseUrls";
@@ -9,11 +9,12 @@ import { baseUrls } from "../baseUrls";
 const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
   const [products, setProducts] = useState([]);
   const [modal, setModal] = useState(null);
+  const [activeImage, setActiveImage] = useState(0); // 👈 for modal image switching
   const [showToast, setShowToast] = useState(false);
   const sectionRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch dynamic data
+  // ✅ Fetch products
   useEffect(() => {
     fetch(`${baseUrls}/api/beauty/${category}`)
       .then((res) => res.json())
@@ -29,7 +30,6 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
     setTimeout(() => setShowToast(false), 2000);
   };
 
-  // Generic Buy Now → Save order
   const handleBuyNow = async (item) => {
     const result = await buyNow(item, "Guest");
     if (result.success) {
@@ -77,22 +77,23 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
         </div>
       </section>
 
-      {/* GALLERY SECTION */}
+      {/* PRODUCT GRID */}
       <section ref={sectionRef} className="py-16 px-4 md:px-12 bg-[#FAFAF0] overflow-hidden">
         <div className="text-center mb-10">
           <h2 className="text-5xl font-[Great_Vibes] text-[#B22222] mb-3">
             Explore Our {title}
           </h2>
-          <p className="italic text-[#444]">
-            "Nourish your hair, naturally."
-          </p>
+          <p className="italic text-[#444]">"Nourish your hair, naturally."</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {products.map((item) => (
             <motion.div
               key={item._id}
-              onClick={() => setModal(item)}
+              onClick={() => {
+                setModal(item);
+                setActiveImage(0);
+              }}
               className="overflow-hidden rounded-3xl cursor-pointer bg-white shadow-lg border border-[#B22222]/20 group relative"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -100,7 +101,7 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3] flex items-center justify-center">
                 <img
-                  src={item.image}
+                  src={item.images?.[0] || item.image}
                   alt={item.title}
                   className="max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
                 />
@@ -118,11 +119,11 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
                 <h3 className="text-lg font-semibold text-[#B22222] mb-1">{item.title}</h3>
                 <p className="text-sm text-gray-700 line-clamp-3">{item.description}</p>
                 <p className="text-[#D4AF37] font-bold mt-2">₹{item.price}</p>
-
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setModal(item);
+                    setActiveImage(0);
                   }}
                   className="mt-3 w-full bg-[#B22222] text-white py-2 rounded-full hover:bg-[#98131f] transition"
                 >
@@ -134,7 +135,7 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
         </div>
       </section>
 
-      {/* DYNAMIC MODAL */}
+      {/* MODAL */}
       {modal && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
@@ -155,14 +156,34 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
               &times;
             </button>
 
-            <div className="w-full md:w-1/2 h-[40vh] md:h-full bg-[#f7f5f0] flex items-center justify-center">
+            {/* Left side: image carousel */}
+            <div className="w-full md:w-1/2 h-[40vh] md:h-full bg-[#f7f5f0] flex flex-col items-center justify-center relative">
               <img
-                src={modal.image}
+                src={modal.images?.[activeImage] || modal.image}
                 alt={modal.title}
                 className="max-w-full max-h-full object-contain"
               />
+
+              {/* Thumbnails */}
+              {modal.images?.length > 1 && (
+                <div className="flex gap-2 mt-4 px-4 overflow-x-auto">
+                  {modal.images.map((img, i) => (
+                    <img
+                      key={i}
+                      src={img}
+                      alt={`thumb-${i}`}
+                      onClick={() => setActiveImage(i)}
+                      className={`h-16 w-16 object-cover rounded-md cursor-pointer border-2 transition ${activeImage === i
+                          ? "border-[#B22222]"
+                          : "border-transparent hover:border-[#D4AF37]"
+                        }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
+            {/* Right side: details */}
             <div className="w-full md:w-1/2 h-full p-6 md:p-8 flex flex-col overflow-y-auto hide-scrollbar bg-[#fffaf5]">
               <h2 className="text-3xl md:text-4xl font-extrabold text-[#B22222] mb-3">{modal.title}</h2>
               <div className="w-20 h-1 bg-[#D4AF37] rounded-full mb-5"></div>
@@ -177,7 +198,6 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
                 >
                   <FaShoppingCart className="inline-block mr-2" /> Add to Cart
                 </button>
-
                 <button
                   onClick={() => handleBuyNow(modal)}
                   className="flex-1 bg-[#FFD700] text-[#B22222] px-6 py-3 rounded-full font-bold hover:bg-[#f0c243] transition"
@@ -198,11 +218,11 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
               {/* Dynamic Fields */}
               <div className="space-y-4 text-sm md:text-base text-[#333] font-medium leading-relaxed mt-auto">
                 {Object.entries(modal)
-                  .filter(([key]) => !["_id", "title", "description", "price", "image"].includes(key))
+                  .filter(([key]) => !["_id", "title", "description", "price", "image", "images"].includes(key))
                   .map(([key, value]) => (
                     <p key={key}>
                       <span className="font-bold text-[#B22222]">
-                        {key.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())}:
+                        {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}:
                       </span>{" "}
                       {value}
                     </p>
@@ -213,7 +233,7 @@ const HairOil = ({ addToCart, category = "hair-oil", title = "Hair Oils" }) => {
         </div>
       )}
 
-      {/* TOAST */}
+      {/* Toast */}
       {showToast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 text-sm md:text-base font-semibold z-[9999]">
           <FaShoppingCart className="text-lg md:text-xl" /> Item added to cart!
