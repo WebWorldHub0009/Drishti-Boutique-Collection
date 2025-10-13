@@ -1,101 +1,157 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-function HeroAdmin() {
-    const [heroData, setHeroData] = useState({
-        title: "",
-        subtitle: "",
-        background: "",
-    });
-    const [file, setFile] = useState(null);
-    const [loading, setLoading] = useState(false);
+const API_URL = "https://drishti-back.onrender.com/api/hero";
+
+export default function HeroAdmin() {
+    const [slides, setSlides] = useState([]);
+    const [form, setForm] = useState({ title: "", desc: "", extra: "" });
+    const [imageFile, setImageFile] = useState(null);
+    const [editingId, setEditingId] = useState(null);
+
+    const fetchSlides = async () => {
+        const { data } = await axios.get(API_URL);
+        setSlides(data);
+    };
 
     useEffect(() => {
-        // Fetch existing hero details
-        axios
-            .get("https://drishti-back.onrender.com/api/hero")
-            .then((res) => setHeroData(res.data))
-            .catch((err) => console.error(err));
+        fetchSlides();
     }, []);
-
-    const handleChange = (e) => {
-        setHeroData({ ...heroData, [e.target.name]: e.target.value });
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-
         const formData = new FormData();
-        formData.append("title", heroData.title);
-        formData.append("subtitle", heroData.subtitle);
-        if (file) formData.append("background", file);
+        formData.append("title", form.title);
+        formData.append("desc", form.desc);
+        formData.append("extra", form.extra);
+        if (imageFile) formData.append("image", imageFile);
 
         try {
-            await axios.put("https://drishti-back.onrender.com/api/hero/update", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            alert("Hero section updated successfully ✅");
+            if (editingId) {
+                await axios.put(`${API_URL}/${editingId}`, formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+            } else {
+                await axios.post(API_URL, formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+            }
+
+            setForm({ title: "", desc: "", extra: "" });
+            setImageFile(null);
+            setEditingId(null);
+            fetchSlides();
         } catch (err) {
             console.error(err);
-            alert("Error updating hero section ❌");
-        } finally {
-            setLoading(false);
         }
     };
 
+    const handleEdit = (slide) => {
+        setForm(slide);
+        setEditingId(slide._id);
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Delete this slide?")) return;
+        await axios.delete(`${API_URL}/${id}`);
+        fetchSlides();
+    };
+
     return (
-        <div className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow">
-            <h2 className="text-2xl font-bold mb-4">Edit Hero Section</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="font-medium">Title</label>
-                    <input
-                        type="text"
-                        name="title"
-                        value={heroData.title}
-                        onChange={handleChange}
-                        className="w-full mt-1 border rounded-md p-2"
-                    />
-                </div>
+        <div className="p-6 bg-gray-100 min-h-screen">
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">Hero Section Management</h2>
 
-                <div>
-                    <label className="font-medium">Subtitle</label>
-                    <input
-                        type="text"
-                        name="subtitle"
-                        value={heroData.subtitle}
-                        onChange={handleChange}
-                        className="w-full mt-1 border rounded-md p-2"
-                    />
-                </div>
-
-                <div>
-                    <label className="font-medium">Background Image</label>
-                    <input
-                        type="file"
-                        onChange={(e) => setFile(e.target.files[0])}
-                        className="w-full mt-1"
-                    />
-                    {heroData.background && (
-                        <img
-                            src={heroData.background}
-                            alt="Hero Background"
-                            className="mt-2 w-full h-48 object-cover rounded-md"
-                        />
-                    )}
-                </div>
+            {/* ✅ Form */}
+            <form
+                onSubmit={handleSubmit}
+                className="bg-white p-6 rounded-xl shadow-md mb-8 grid gap-4 md:grid-cols-2"
+            >
+                <input
+                    type="text"
+                    name="title"
+                    placeholder="Title"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className="border p-2 rounded-md w-full"
+                    required
+                />
+                <input
+                    type="text"
+                    name="desc"
+                    placeholder="Description"
+                    value={form.desc}
+                    onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                    className="border p-2 rounded-md w-full"
+                    required
+                />
+                <input
+                    type="text"
+                    name="extra"
+                    placeholder="Extra Line"
+                    value={form.extra}
+                    onChange={(e) => setForm({ ...form, extra: e.target.value })}
+                    className="border p-2 rounded-md w-full"
+                />
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files[0])}
+                    className="border p-2 rounded-md w-full md:col-span-2"
+                    required={!editingId}
+                />
 
                 <button
                     type="submit"
-                    disabled={loading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition md:col-span-2"
                 >
-                    {loading ? "Updating..." : "Save Changes"}
+                    {editingId ? "Update Slide" : "Add Slide"}
                 </button>
             </form>
+
+            {/* ✅ Slides Table */}
+            <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+                <table className="min-w-full text-left border">
+                    <thead className="bg-gray-200">
+                        <tr>
+                            <th className="p-3 border">Image</th>
+                            <th className="p-3 border">Title</th>
+                            <th className="p-3 border">Description</th>
+                            <th className="p-3 border">Extra</th>
+                            <th className="p-3 border text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {slides.map((slide) => (
+                            <tr key={slide._id} className="border-t">
+                                <td className="p-3 border">
+                                    <img
+                                        src={slide.image}
+                                        alt={slide.title}
+                                        className="w-20 h-16 object-cover rounded-md"
+                                    />
+                                </td>
+                                <td className="p-3 border">{slide.title}</td>
+                                <td className="p-3 border">{slide.desc}</td>
+                                <td className="p-3 border">{slide.extra}</td>
+                                <td className="p-3 border text-center space-x-2">
+                                    <button
+                                        onClick={() => handleEdit(slide)}
+                                        className="bg-yellow-400 px-3 py-1 rounded-md text-white hover:bg-yellow-500"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(slide._id)}
+                                        className="bg-red-500 px-3 py-1 rounded-md text-white hover:bg-red-600"
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
-
-export default HeroAdmin;
