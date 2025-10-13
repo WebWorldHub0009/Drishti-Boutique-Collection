@@ -35,6 +35,7 @@ import AdminLayout from './Pages/AdminLayout';
 import AdminCollections from './Pages/AdminCollections';
 import AdminBeauty from './Pages/AdminBeauty';
 import AdminOrders from './Pages/AdminOrders';
+import HeroAdmin from './Pages/HeroAdmin';
 
 import { Route, Routes } from "react-router-dom";
 import { useEffect, useState } from 'react';
@@ -85,6 +86,8 @@ function App() {
         <Route path='/beauty-care/hair-oil' element={<HairOil addToCart={addToCart} />} />
         <Route path='/beauty-care/night-cream' element={<NightCream addToCart={addToCart} />} />
 
+        {/* Hero Section */}
+        <Route path="/admin/hero" element={<HeroAdmin />} />
         {/* Cart & Checkout */}
         <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
         <Route path="/checkout" element={<Checkout />} />

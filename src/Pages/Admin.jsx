@@ -19,6 +19,7 @@ function Admin() {
         { path: "/admin/collections", label: "Collections" },
         { path: "/admin/beauty", label: "Beauty Care" },
         { path: "/admin/orders", label: "Orders" },
+        { path: "/admin/hero", label: "Hero Section" }, // ✅ new
     ];
 
     return (
