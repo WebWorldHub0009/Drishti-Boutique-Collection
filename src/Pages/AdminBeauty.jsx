@@ -10,7 +10,7 @@ function AdminBeauty() {
         title: "",
         description: "",
         price: "",
-        image: null,
+        images: [],
         ingredients: "",
         skinType: "",
         volume: "",
@@ -19,7 +19,7 @@ function AdminBeauty() {
     const [editingId, setEditingId] = useState(null);
     const token = localStorage.getItem("token");
 
-    // ✅ Fetch items whenever selectedCategory changes
+    // ✅ Fetch items
     const fetchItems = async (category) => {
         try {
             const res = await axios.get(`${baseUrls}/api/beauty/${category}`, {
@@ -35,7 +35,7 @@ function AdminBeauty() {
         fetchItems(selectedCategory);
     }, [selectedCategory]);
 
-    // ✅ Save item (Create / Update)
+    // ✅ Save or Update
     const saveItem = async () => {
         if (!form.title || !form.description || !form.price || !form.category) {
             alert("Please fill all required fields!");
@@ -53,22 +53,21 @@ function AdminBeauty() {
             formData.append("volume", form.volume);
             formData.append("usage", form.usage);
 
-            if (form.image instanceof File) {
-                formData.append("image", form.image);
-            }
+            // 👇 Append multiple images
+            form.images?.forEach((file) => {
+                if (file instanceof File) {
+                    formData.append("images", file);
+                }
+            });
 
             let res;
             if (editingId) {
-                res = await axios.put(
-                    `${baseUrls}/api/beauty/${editingId}`,
-                    formData,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "multipart/form-data",
-                        },
-                    }
-                );
+                res = await axios.put(`${baseUrls}/api/beauty/${editingId}`, formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
                 setItems(items.map((item) => (item._id === editingId ? res.data : item)));
                 setEditingId(null);
             } else {
@@ -81,12 +80,13 @@ function AdminBeauty() {
                 setItems([...items, res.data]);
             }
 
+            // Reset form
             setForm({
                 category: selectedCategory,
                 title: "",
                 description: "",
                 price: "",
-                image: null,
+                images: [],
                 ingredients: "",
                 skinType: "",
                 volume: "",
@@ -104,7 +104,7 @@ function AdminBeauty() {
             title: item.title,
             description: item.description,
             price: item.price,
-            image: item.image || null,
+            images: item.images || [],
             ingredients: item.ingredients || "",
             skinType: item.skinType || "",
             volume: item.volume || "",
@@ -147,7 +147,7 @@ function AdminBeauty() {
                 </select>
             </div>
 
-            {/* Form */}
+            {/* ✅ Form */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <input
                     type="text"
@@ -173,18 +173,28 @@ function AdminBeauty() {
                     className="border px-3 py-2 rounded-lg w-full"
                 />
 
+                {/* 👇 Multiple image upload */}
                 <input
                     type="file"
-                    onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+                    multiple
+                    onChange={(e) =>
+                        setForm({ ...form, images: Array.from(e.target.files) })
+                    }
                     className="border px-3 py-2 rounded-lg w-full"
                 />
 
-                {form.image && (
-                    <img
-                        src={form.image instanceof File ? URL.createObjectURL(form.image) : form.image}
-                        alt="Preview"
-                        className="h-24 mt-2 rounded object-cover"
-                    />
+                {/* 👇 Preview of selected images */}
+                {form.images?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2 col-span-full">
+                        {form.images.map((img, i) => (
+                            <img
+                                key={i}
+                                src={img instanceof File ? URL.createObjectURL(img) : img}
+                                alt={`Preview ${i}`}
+                                className="h-20 w-20 object-cover rounded"
+                            />
+                        ))}
+                    </div>
                 )}
 
                 <input
@@ -227,16 +237,21 @@ function AdminBeauty() {
                 </button>
             </div>
 
-            {/* Items List */}
+            {/* ✅ Items List */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item) => (
                     <div key={item._id} className="border p-3 rounded-lg shadow">
-                        {item.image && (
-                            <img
-                                src={item.image}
-                                alt={item.title}
-                                className="h-32 w-full object-cover rounded"
-                            />
+                        {item.images?.length > 0 && (
+                            <div className="flex gap-2 overflow-x-auto">
+                                {item.images.map((img, i) => (
+                                    <img
+                                        key={i}
+                                        src={img}
+                                        alt={item.title}
+                                        className="h-24 w-24 object-cover rounded"
+                                    />
+                                ))}
+                            </div>
                         )}
                         <h2 className="text-lg font-bold mt-2">{item.title}</h2>
                         <p>{item.description}</p>
