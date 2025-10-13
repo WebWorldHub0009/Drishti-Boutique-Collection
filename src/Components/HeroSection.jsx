@@ -8,6 +8,7 @@ export default function HeroSection() {
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
 
+  // 🟢 Fetch hero slides
   useEffect(() => {
     fetch(`${baseUrls}/api/hero`)
       .then((res) => res.json())
@@ -15,6 +16,7 @@ export default function HeroSection() {
       .catch((err) => console.error("Error fetching hero slides:", err));
   }, []);
 
+  // 🟡 Auto-slide timer
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (slides.length ? (prev + 1) % slides.length : 0));
@@ -23,7 +25,11 @@ export default function HeroSection() {
   }, [slides]);
 
   if (!slides.length) {
-    return <div className="text-center py-20 text-gray-500">Loading slides...</div>;
+    return (
+      <div className="text-center py-20 text-gray-500">
+        Loading slides...
+      </div>
+    );
   }
 
   return (
@@ -34,13 +40,38 @@ export default function HeroSection() {
           className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${current === idx ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
         >
-          <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
+          {/* 🖼️ Background Image */}
+          <img
+            src={slide.image}
+            alt={slide.title}
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/40 to-black/60" />
 
+          {/* 🌊 Floating Offer Badges */}
+          {slide.offers && slide.offers.length > 0 && (
+            <div className="absolute top-6 left-6 z-30 flex flex-col gap-3 animate-fadeIn">
+              {slide.offers.map((offer, index) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-r from-[#D4AF37]/90 to-[#B22222]/90 px-3 py-2 rounded-lg text-black font-semibold shadow-lg backdrop-blur-md animate-bounce-slow"
+                >
+                  {offer.text} {offer.discount && `– ${offer.discount}`}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 🌸 Watermark */}
           <div className="absolute top-4 right-4 z-20 pointer-events-none">
-            <img src={logoWatermark} alt="Watermark" className="w-28 md:w-36 opacity-50" />
+            <img
+              src={logoWatermark}
+              alt="Watermark"
+              className="w-28 md:w-36 opacity-50"
+            />
           </div>
 
+          {/* 📝 Main Text */}
           <div className="absolute inset-0 flex items-center justify-center text-center px-4 z-30">
             <div className="max-w-3xl text-white">
               <h1 className="text-4xl sm:text-6xl md:text-7xl font-[Playfair_Display] font-extrabold text-[#D4AF37] mb-4 drop-shadow-[3px_3px_6px_rgba(0,0,0,0.7)]">
@@ -52,9 +83,24 @@ export default function HeroSection() {
               <p className="text-sm sm:text-lg md:text-xl text-[#FAFAF0]/80 mb-6 italic drop-shadow-sm">
                 {slide.extra}
               </p>
+
+              {/* 🏷️ Offers Below Title (optional) */}
+              {slide.offers && slide.offers.length > 0 && (
+                <div className="mt-4 flex flex-wrap justify-center gap-3 animate-fadeIn">
+                  {slide.offers.map((offer, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#D4AF37]/80 text-black px-4 py-2 rounded-full shadow-md text-sm sm:text-base font-semibold"
+                    >
+                      {offer.text} {offer.discount && `– ${offer.discount}`}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <Link
                 to="/royal-pick"
-                className="inline-block bg-gradient-to-r from-[#B22222] to-[#D4AF37] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold shadow-md hover:from-[#98131f] hover:to-[#c9a737] transition-all"
+                className="inline-block bg-gradient-to-r from-[#B22222] to-[#D4AF37] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold shadow-md hover:from-[#98131f] hover:to-[#c9a737] transition-all mt-6"
               >
                 Explore Collection
               </Link>
@@ -63,9 +109,12 @@ export default function HeroSection() {
         </div>
       ))}
 
+      {/* ⬅️➡️ Navigation Arrows */}
       <div className="absolute bottom-6 right-6 flex gap-3 z-40">
         <button
-          onClick={() => setCurrent((prev) => (prev - 1 + slides.length) % slides.length)}
+          onClick={() =>
+            setCurrent((prev) => (prev - 1 + slides.length) % slides.length)
+          }
           className="bg-black/50 p-3 rounded-full text-white hover:bg-[#D4AF37] hover:text-black transition"
         >
           <FiArrowLeft size={20} />

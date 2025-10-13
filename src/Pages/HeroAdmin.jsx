@@ -8,6 +8,7 @@ export default function HeroAdmin() {
     const [form, setForm] = useState({ title: "", desc: "", extra: "" });
     const [imageFile, setImageFile] = useState(null);
     const [editingId, setEditingId] = useState(null);
+    const [offers, setOffers] = useState([{ text: "", discount: "" }]);
 
     const fetchSlides = async () => {
         const { data } = await axios.get(API_URL);
@@ -24,6 +25,7 @@ export default function HeroAdmin() {
         formData.append("title", form.title);
         formData.append("desc", form.desc);
         formData.append("extra", form.extra);
+        formData.append("offers", JSON.stringify(offers));
         if (imageFile) formData.append("image", imageFile);
 
         try {
@@ -92,6 +94,53 @@ export default function HeroAdmin() {
                     onChange={(e) => setForm({ ...form, extra: e.target.value })}
                     className="border p-2 rounded-md w-full"
                 />
+                {/* Offers Section */}
+                <div className="md:col-span-2">
+                    <h3 className="text-lg font-semibold mb-2">Offers</h3>
+                    {offers.map((offer, index) => (
+                        <div key={index} className="flex gap-2 mb-2">
+                            <input
+                                type="text"
+                                placeholder="Offer Text"
+                                value={offer.text}
+                                onChange={(e) => {
+                                    const newOffers = [...offers];
+                                    newOffers[index].text = e.target.value;
+                                    setOffers(newOffers);
+                                }}
+                                className="border p-2 rounded-md w-full"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Discount (e.g. 30% OFF)"
+                                value={offer.discount}
+                                onChange={(e) => {
+                                    const newOffers = [...offers];
+                                    newOffers[index].discount = e.target.value;
+                                    setOffers(newOffers);
+                                }}
+                                className="border p-2 rounded-md w-40"
+                            />
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setOffers(offers.filter((_, i) => i !== index))
+                                }
+                                className="bg-red-500 text-white px-2 rounded"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        onClick={() => setOffers([...offers, { text: "", discount: "" }])}
+                        className="bg-green-500 text-white px-3 py-1 rounded-md mt-1"
+                    >
+                        + Add Offer
+                    </button>
+                </div>
+
                 <input
                     type="file"
                     accept="image/*"
