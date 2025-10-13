@@ -18,7 +18,14 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
   useEffect(() => {
     axios
       .get(`${baseUrls}/api/collection/${category}`)
-      .then((res) => setProducts(res.data))
+      .then((res) => {
+        // Normalize images: ensure every product has an 'images' array
+        const normalized = res.data.map(item => ({
+          ...item,
+          images: item.images?.length ? item.images : item.image ? [item.image] : [],
+        }));
+        setProducts(normalized);
+      })
       .catch((err) => console.error(err));
   }, [category]);
 
@@ -38,13 +45,15 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
   };
 
   const handlePrevImage = () => {
-    setActiveImageIndex((prev) =>
+    if (!modal?.images?.length) return;
+    setActiveImageIndex(prev =>
       prev === 0 ? modal.images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
-    setActiveImageIndex((prev) =>
+    if (!modal?.images?.length) return;
+    setActiveImageIndex(prev =>
       prev === modal.images.length - 1 ? 0 : prev + 1
     );
   };
@@ -92,7 +101,7 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {products.map((item) => (
+          {products.map(item => (
             <div
               key={item._id}
               className="rounded-3xl overflow-hidden bg-white shadow-lg border border-[#e6c17b] group relative cursor-pointer hover:shadow-2xl hover:-translate-y-3 transition-all duration-500"
@@ -100,15 +109,12 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3]">
                 <img
-                  src={item.images?.[0] || item.image}
+                  src={item.images[0] || ""}
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
                 <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart(item);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}
                   className="absolute top-4 right-4 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300"
                 >
                   <FiShoppingCart size={20} />
@@ -152,7 +158,7 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
             </button>
 
             <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex items-center justify-center">
-              {modal.images?.length > 0 ? (
+              {modal.images.length > 0 && (
                 <>
                   <button
                     onClick={handlePrevImage}
@@ -172,8 +178,6 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
                     ›
                   </button>
                 </>
-              ) : (
-                <img src={modal.image} alt={modal.title} className="w-full h-full object-contain" />
               )}
             </div>
 
@@ -196,7 +200,7 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
               {/* Dynamic Fields */}
               <div className="space-y-3 text-sm text-[#333] font-medium mb-6">
                 {Object.keys(modal).map(
-                  (key) =>
+                  key =>
                     !["_id", "title", "description", "price", "image", "images"].includes(key) && (
                       <p key={key}>
                         <span className="font-bold text-[#B22222]">{key}:</span> {modal[key]}
