@@ -6,8 +6,9 @@ import { FaWhatsapp } from "react-icons/fa";
 import HeroBG from "../assets/images/gallery/bg.jpg";
 
 export default function DesignerSuit({ addToCart, category = "sarees", title = "Designer Sarees" }) {
-  const [suits, setSuits] = useState([]);
+  const [items, setItems] = useState([]);
   const [modal, setModal] = useState(null);
+  const [activeImage, setActiveImage] = useState(0); // track active image in modal
   const [showToast, setShowToast] = useState(false);
   const sectionRef = useRef(null);
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function DesignerSuit({ addToCart, category = "sarees", title = "
   useEffect(() => {
     axios
       .get(`http://localhost:5000/api/collection/${category}`)
-      .then((res) => setSuits(res.data))
+      .then((res) => setItems(res.data))
       .catch((err) => console.error(err));
   }, [category]);
 
@@ -76,15 +77,15 @@ export default function DesignerSuit({ addToCart, category = "sarees", title = "
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {suits.map((item) => (
+          {items.map((item) => (
             <div
               key={item._id}
               className="rounded-3xl overflow-hidden bg-white shadow-lg border border-[#e6c17b] group relative cursor-pointer hover:shadow-2xl hover:-translate-y-3 transition-all duration-500"
-              onClick={() => setModal(item)}
+              onClick={() => { setModal(item); setActiveImage(0); }}
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3]">
                 <img
-                  src={item.image}
+                  src={item.images?.[0] || item.image} // first image or fallback
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
@@ -136,14 +137,29 @@ export default function DesignerSuit({ addToCart, category = "sarees", title = "
               ×
             </button>
 
-            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2]">
+            {/* IMAGE CAROUSEL */}
+            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex flex-col items-center justify-center">
               <img
-                src={modal.image}
+                src={modal.images?.[activeImage] || modal.image}
                 alt={modal.title}
                 className="w-full h-full object-contain"
               />
+              {modal.images?.length > 1 && (
+                <div className="flex gap-2 mt-4 overflow-x-auto px-4">
+                  {modal.images.map((img, i) => (
+                    <img
+                      key={i}
+                      src={img}
+                      alt={`thumb-${i}`}
+                      onClick={() => setActiveImage(i)}
+                      className={`h-16 w-16 object-cover rounded-md cursor-pointer border-2 ${activeImage === i ? "border-[#B22222]" : "border-transparent hover:border-[#FFD700]"}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
+            {/* DETAILS */}
             <div className="w-full md:w-1/2 h-full p-8 flex flex-col overflow-y-auto hide-scrollbar bg-[#fffaf5]">
               <h2 className="text-3xl font-bold text-[#B22222] mb-3">{modal.title}</h2>
               <div className="w-20 h-1 bg-[#FFD700] rounded-full mb-5"></div>

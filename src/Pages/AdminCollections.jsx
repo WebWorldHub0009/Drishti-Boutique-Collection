@@ -10,8 +10,8 @@ function AdminCollection() {
         title: "",
         description: "",
         price: "",
-        file: null,
-        preview: null,
+        files: [],       // ✅ multiple files
+        previews: [],    // ✅ multiple previews
         fabric: "",
         work: "",
         dupatta: "",
@@ -20,10 +20,11 @@ function AdminCollection() {
         customAlterations: "",
     });
     const [editingId, setEditingId] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const token = localStorage.getItem("token");
 
-    // ✅ Fetch items
+    // Fetch items
     useEffect(() => {
         const fetchItems = async () => {
             try {
@@ -38,17 +39,19 @@ function AdminCollection() {
         fetchItems();
     }, [token]);
 
-    // ✅ Add / Update item
+    // Add / Update item
     const saveItem = async () => {
         if (!form.title || !form.description || !form.price || !form.category) {
             alert("Please fill all required fields!");
             return;
         }
 
+        setLoading(true);
+
         const formData = new FormData();
+        form.files.forEach((file) => formData.append("images", file)); // multiple images
         Object.entries(form).forEach(([key, value]) => {
-            if (key === "file" && value) formData.append("image", value);
-            else if (key !== "file" && key !== "preview") formData.append(key, value);
+            if (!["files", "previews"].includes(key)) formData.append(key, value);
         });
 
         try {
@@ -71,8 +74,8 @@ function AdminCollection() {
                 title: "",
                 description: "",
                 price: "",
-                file: null,
-                preview: null,
+                files: [],
+                previews: [],
                 fabric: "",
                 work: "",
                 dupatta: "",
@@ -82,6 +85,8 @@ function AdminCollection() {
             });
         } catch (err) {
             console.error("Error saving collection item:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -103,8 +108,8 @@ function AdminCollection() {
             title: item.title || "",
             description: item.description || "",
             price: item.price || "",
-            file: null,
-            preview: item.image || null,
+            files: [],
+            previews: item.images || [item.image], // multiple previews
             fabric: item.fabric || "",
             work: item.work || "",
             dupatta: item.dupatta || "",
@@ -115,9 +120,10 @@ function AdminCollection() {
         setEditingId(item._id);
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) setForm({ ...form, file, preview: URL.createObjectURL(file) });
+    const handleFilesChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        const selectedPreviews = selectedFiles.map((file) => URL.createObjectURL(file));
+        setForm({ ...form, files: selectedFiles, previews: selectedPreviews });
     };
 
     const groupedCollections = items.reduce((acc, item) => {
@@ -162,18 +168,22 @@ function AdminCollection() {
                     />
                 ))}
 
-                <input type="file" accept="image/*" onChange={handleFileChange} className="border px-3 py-2 rounded-lg" />
+                <input type="file" accept="image/*" multiple onChange={handleFilesChange} className="border px-3 py-2 rounded-lg" />
 
-                {form.preview && (
-                    <div className="flex justify-center md:justify-start mt-2">
-                        <img src={form.preview} alt="Preview" className="w-40 h-40 object-cover rounded-lg border" />
+                {/* Preview multiple images */}
+                {form.previews.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        {form.previews.map((src, idx) => (
+                            <img key={idx} src={src} alt={`Preview ${idx}`} className="w-24 h-24 object-cover rounded-lg border" />
+                        ))}
                     </div>
                 )}
             </div>
 
             <button
                 onClick={saveItem}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition mb-8"
+                disabled={loading}
+                className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition mb-8 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
             >
                 {editingId ? "Update Item" : "Add Item"}
             </button>
@@ -189,7 +199,7 @@ function AdminCollection() {
                                 className="border p-4 rounded-lg hover:shadow-md transition cursor-pointer"
                                 onClick={() => editItem(item)}
                             >
-                                <img src={item.image} alt={item.title} className="w-full h-40 object-cover rounded mb-3" />
+                                <img src={item.images?.[0] || item.image} alt={item.title} className="w-full h-40 object-cover rounded mb-3" />
                                 <p className="font-bold">{item.title} - ₹{item.price}</p>
                                 <div className="flex justify-between mt-3">
                                     <button onClick={(e) => { e.stopPropagation(); editItem(item); }} className="text-green-600 hover:underline">
