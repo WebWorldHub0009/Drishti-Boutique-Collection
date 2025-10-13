@@ -25,7 +25,10 @@ export default function HeroAdmin() {
         formData.append("title", form.title);
         formData.append("desc", form.desc);
         formData.append("extra", form.extra);
-        formData.append("offers", JSON.stringify(offers));
+
+        const validOffers = offers.filter((o) => o.text && o.discount);
+        formData.append("offers", JSON.stringify(validOffers));
+
         if (imageFile) formData.append("image", imageFile);
 
         try {
@@ -40,6 +43,7 @@ export default function HeroAdmin() {
             }
 
             setForm({ title: "", desc: "", extra: "" });
+            setOffers([{ text: "", discount: "" }]);
             setImageFile(null);
             setEditingId(null);
             fetchSlides();
@@ -49,7 +53,8 @@ export default function HeroAdmin() {
     };
 
     const handleEdit = (slide) => {
-        setForm(slide);
+        setForm({ title: slide.title, desc: slide.desc, extra: slide.extra });
+        setOffers(slide.offers?.length ? slide.offers : [{ text: "", discount: "" }]);
         setEditingId(slide._id);
     };
 
@@ -63,14 +68,13 @@ export default function HeroAdmin() {
         <div className="p-6 bg-gray-100 min-h-screen">
             <h2 className="text-3xl font-bold mb-6 text-gray-800">Hero Section Management</h2>
 
-            {/* ✅ Form */}
+            {/* Form */}
             <form
                 onSubmit={handleSubmit}
                 className="bg-white p-6 rounded-xl shadow-md mb-8 grid gap-4 md:grid-cols-2"
             >
                 <input
                     type="text"
-                    name="title"
                     placeholder="Title"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -79,7 +83,6 @@ export default function HeroAdmin() {
                 />
                 <input
                     type="text"
-                    name="desc"
                     placeholder="Description"
                     value={form.desc}
                     onChange={(e) => setForm({ ...form, desc: e.target.value })}
@@ -88,24 +91,24 @@ export default function HeroAdmin() {
                 />
                 <input
                     type="text"
-                    name="extra"
                     placeholder="Extra Line"
                     value={form.extra}
                     onChange={(e) => setForm({ ...form, extra: e.target.value })}
                     className="border p-2 rounded-md w-full"
                 />
+
                 {/* Offers Section */}
                 <div className="md:col-span-2">
                     <h3 className="text-lg font-semibold mb-2">Offers</h3>
-                    {offers.map((offer, index) => (
-                        <div key={index} className="flex gap-2 mb-2">
+                    {offers.map((offer, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
                             <input
                                 type="text"
                                 placeholder="Offer Text"
                                 value={offer.text}
                                 onChange={(e) => {
                                     const newOffers = [...offers];
-                                    newOffers[index].text = e.target.value;
+                                    newOffers[idx].text = e.target.value;
                                     setOffers(newOffers);
                                 }}
                                 className="border p-2 rounded-md w-full"
@@ -116,16 +119,14 @@ export default function HeroAdmin() {
                                 value={offer.discount}
                                 onChange={(e) => {
                                     const newOffers = [...offers];
-                                    newOffers[index].discount = e.target.value;
+                                    newOffers[idx].discount = e.target.value;
                                     setOffers(newOffers);
                                 }}
                                 className="border p-2 rounded-md w-40"
                             />
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setOffers(offers.filter((_, i) => i !== index))
-                                }
+                                onClick={() => setOffers(offers.filter((_, i) => i !== idx))}
                                 className="bg-red-500 text-white px-2 rounded"
                             >
                                 ✕
@@ -157,7 +158,7 @@ export default function HeroAdmin() {
                 </button>
             </form>
 
-            {/* ✅ Slides Table */}
+            {/* Slides Table */}
             <div className="bg-white rounded-xl shadow-md overflow-x-auto">
                 <table className="min-w-full text-left border">
                     <thead className="bg-gray-200">
@@ -166,6 +167,7 @@ export default function HeroAdmin() {
                             <th className="p-3 border">Title</th>
                             <th className="p-3 border">Description</th>
                             <th className="p-3 border">Extra</th>
+                            <th className="p-3 border">Offers</th>
                             <th className="p-3 border text-center">Actions</th>
                         </tr>
                     </thead>
@@ -182,6 +184,13 @@ export default function HeroAdmin() {
                                 <td className="p-3 border">{slide.title}</td>
                                 <td className="p-3 border">{slide.desc}</td>
                                 <td className="p-3 border">{slide.extra}</td>
+                                <td className="p-3 border">
+                                    {slide.offers?.map((offer, idx) => (
+                                        <div key={idx}>
+                                            {offer.text} - {offer.discount}
+                                        </div>
+                                    ))}
+                                </td>
                                 <td className="p-3 border text-center space-x-2">
                                     <button
                                         onClick={() => handleEdit(slide)}
