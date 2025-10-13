@@ -7,15 +7,14 @@ import HeroBG from "../assets/images/gallery/bg.jpg";
 import { buyNow } from "../utils/order.js";
 import { baseUrls } from "../baseUrls.js";
 
-export default function ProductGallery({ category = "suit", title = "Collection" }) {
+export default function ProductGallery({ category = "suit", title = "Collection", addToCart }) {
   const [products, setProducts] = useState([]);
   const [modal, setModal] = useState(null);
+  const [activeImage, setActiveImage] = useState(0);
   const [showToast, setShowToast] = useState(false);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const sectionRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch products
   useEffect(() => {
     axios
       .get(`${baseUrls}/api/collection/${category}`)
@@ -27,27 +26,16 @@ export default function ProductGallery({ category = "suit", title = "Collection"
     sectionRef.current?.scrollIntoView({ behavior: "smooth" });
 
   const handleAddToCart = (item) => {
+    if (addToCart) addToCart(item);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
-    // Optional: Add to cart logic here
   };
 
   const handleBuyNow = async (item) => {
+    if (addToCart) addToCart(item);
     const result = await buyNow(item, "Guest");
     if (result.success) alert("Order placed successfully!");
     else alert("Failed: " + result.message);
-  };
-
-  const handlePrevImage = () => {
-    setActiveImageIndex((prev) =>
-      prev === 0 ? modal.images.length - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = () => {
-    setActiveImageIndex((prev) =>
-      prev === modal.images.length - 1 ? 0 : prev + 1
-    );
   };
 
   return (
@@ -65,7 +53,7 @@ export default function ProductGallery({ category = "suit", title = "Collection"
               {title}
             </h1>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/90 leading-relaxed mb-6">
-              Explore the finest selection in our {category} category.
+              Explore the finest selection in our {category} collection.
             </p>
             <button
               onClick={scrollToSection}
@@ -97,28 +85,21 @@ export default function ProductGallery({ category = "suit", title = "Collection"
             <div
               key={item._id}
               className="rounded-3xl overflow-hidden bg-white shadow-lg border border-[#e6c17b] group relative cursor-pointer hover:shadow-2xl hover:-translate-y-3 transition-all duration-500"
-              onClick={() => {
-                setModal(item);
-                setActiveImageIndex(0);
-              }}
+              onClick={() => { setModal(item); setActiveImage(0); }}
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3]">
                 <img
-                  src={item.images && item.images.length > 0 ? item.images[0] : item.image}
+                  src={item.images?.[0] || item.image}
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
                 <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart(item);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}
                   className="absolute top-4 right-4 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300"
                 >
                   <FiShoppingCart size={20} />
                 </div>
               </div>
-
               <div className="px-2 py-2 flex flex-col justify-between h-[140px]">
                 <div>
                   <h3 className="text-lg font-bold text-[#B22222] mb-1">{item.title}</h3>
@@ -138,7 +119,7 @@ export default function ProductGallery({ category = "suit", title = "Collection"
         </div>
       </section>
 
-      {/* MODAL WITH MULTIPLE IMAGES */}
+      {/* MODAL */}
       {modal && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
@@ -155,30 +136,25 @@ export default function ProductGallery({ category = "suit", title = "Collection"
               ×
             </button>
 
-            {/* IMAGE CAROUSEL */}
-            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex items-center justify-center">
-              {modal.images && modal.images.length > 0 ? (
-                <>
-                  <button
-                    onClick={handlePrevImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 hover:bg-white"
-                  >
-                    ‹
-                  </button>
-                  <img
-                    src={modal.images[activeImageIndex]}
-                    alt={`${modal.title}-${activeImageIndex}`}
-                    className="w-full h-full object-contain"
-                  />
-                  <button
-                    onClick={handleNextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 hover:bg-white"
-                  >
-                    ›
-                  </button>
-                </>
-              ) : (
-                <img src={modal.image} alt={modal.title} className="w-full h-full object-contain" />
+            {/* IMAGE CAROUSEL WITH THUMBNAILS */}
+            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex flex-col items-center justify-center">
+              <img
+                src={modal.images?.[activeImage] || modal.image}
+                alt={modal.title}
+                className="w-full h-full object-contain"
+              />
+              {modal.images?.length > 1 && (
+                <div className="flex gap-2 mt-4 overflow-x-auto px-4">
+                  {modal.images.map((img, i) => (
+                    <img
+                      key={i}
+                      src={img}
+                      alt={`thumb-${i}`}
+                      onClick={() => setActiveImage(i)}
+                      className={`h-16 w-16 object-cover rounded-md cursor-pointer border-2 ${activeImage === i ? "border-[#B22222]" : "border-transparent hover:border-[#FFD700]"}`}
+                    />
+                  ))}
+                </div>
               )}
             </div>
 
@@ -199,7 +175,6 @@ export default function ProductGallery({ category = "suit", title = "Collection"
                 <FaWhatsapp className="text-xl" /> Book Now on WhatsApp
               </a>
 
-              {/* Dynamic Fields */}
               <div className="space-y-3 text-sm text-[#333] font-medium mb-6">
                 {Object.keys(modal).map(
                   (key) =>
@@ -211,7 +186,6 @@ export default function ProductGallery({ category = "suit", title = "Collection"
                 )}
               </div>
 
-              {/* ACTION BUTTONS */}
               <div className="flex gap-4 mt-auto">
                 <button
                   onClick={() => handleAddToCart(modal)}
