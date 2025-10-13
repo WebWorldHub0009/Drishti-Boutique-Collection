@@ -4,6 +4,7 @@ import axios from "axios";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import HeroBG from "../assets/images/gallery/bg.jpg";
+import { baseUrls } from "../baseUrls";
 
 export default function DesignerSuit({ addToCart, category = "sarees", title = "Designer Sarees" }) {
   const [items, setItems] = useState([]);
