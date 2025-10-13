@@ -11,10 +11,11 @@ export default function ProductGallery({ category = "suit", title = "Collection"
   const [products, setProducts] = useState([]);
   const [modal, setModal] = useState(null);
   const [showToast, setShowToast] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const sectionRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch products based on category
+  // Fetch products
   useEffect(() => {
     axios
       .get(`${baseUrls}/api/collection/${category}`)
@@ -28,19 +29,26 @@ export default function ProductGallery({ category = "suit", title = "Collection"
   const handleAddToCart = (item) => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
-    // Optionally: Add to cart state here
+    // Optional: Add to cart logic here
   };
 
-  // Generic Buy Now → Save order
   const handleBuyNow = async (item) => {
     const result = await buyNow(item, "Guest");
-    if (result.success) {
-      alert("Order placed successfully!");
-    } else {
-      alert("Failed: " + result.message);
-    }
+    if (result.success) alert("Order placed successfully!");
+    else alert("Failed: " + result.message);
   };
 
+  const handlePrevImage = () => {
+    setActiveImageIndex((prev) =>
+      prev === 0 ? modal.images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setActiveImageIndex((prev) =>
+      prev === modal.images.length - 1 ? 0 : prev + 1
+    );
+  };
 
   return (
     <>
@@ -89,11 +97,14 @@ export default function ProductGallery({ category = "suit", title = "Collection"
             <div
               key={item._id}
               className="rounded-3xl overflow-hidden bg-white shadow-lg border border-[#e6c17b] group relative cursor-pointer hover:shadow-2xl hover:-translate-y-3 transition-all duration-500"
-              onClick={() => setModal(item)}
+              onClick={() => {
+                setModal(item);
+                setActiveImageIndex(0);
+              }}
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3]">
                 <img
-                  src={item.image}
+                  src={item.images && item.images.length > 0 ? item.images[0] : item.image}
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
@@ -127,7 +138,7 @@ export default function ProductGallery({ category = "suit", title = "Collection"
         </div>
       </section>
 
-      {/* DYNAMIC MODAL */}
+      {/* MODAL WITH MULTIPLE IMAGES */}
       {modal && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
@@ -144,23 +155,41 @@ export default function ProductGallery({ category = "suit", title = "Collection"
               ×
             </button>
 
-            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2]">
-              <img
-                src={modal.image}
-                alt={modal.title}
-                className="w-full h-full object-contain"
-              />
+            {/* IMAGE CAROUSEL */}
+            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex items-center justify-center">
+              {modal.images && modal.images.length > 0 ? (
+                <>
+                  <button
+                    onClick={handlePrevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 hover:bg-white"
+                  >
+                    ‹
+                  </button>
+                  <img
+                    src={modal.images[activeImageIndex]}
+                    alt={`${modal.title}-${activeImageIndex}`}
+                    className="w-full h-full object-contain"
+                  />
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 hover:bg-white"
+                  >
+                    ›
+                  </button>
+                </>
+              ) : (
+                <img src={modal.image} alt={modal.title} className="w-full h-full object-contain" />
+              )}
             </div>
 
+            {/* DETAILS */}
             <div className="w-full md:w-1/2 h-full p-8 flex flex-col overflow-y-auto hide-scrollbar bg-[#fffaf5]">
               <h2 className="text-3xl font-bold text-[#B22222] mb-3">{modal.title}</h2>
               <div className="w-20 h-1 bg-[#FFD700] rounded-full mb-5"></div>
               <p className="text-base text-[#555] mb-6">{modal.description}</p>
-
               {modal.price && (
                 <p className="text-2xl font-bold text-[#B22222] mb-6">Price: ₹{modal.price}</p>
               )}
-
               <a
                 href="https://www.whatsapp.com/catalog/919811676755/?app_absent=0"
                 target="_blank"
@@ -172,15 +201,17 @@ export default function ProductGallery({ category = "suit", title = "Collection"
 
               {/* Dynamic Fields */}
               <div className="space-y-3 text-sm text-[#333] font-medium mb-6">
-                {Object.keys(modal).map((key) =>
-                  !["_id", "title", "description", "price", "image"].includes(key) ? (
-                    <p key={key}>
-                      <span className="font-bold text-[#B22222]">{key}:</span> {modal[key]}
-                    </p>
-                  ) : null
+                {Object.keys(modal).map(
+                  (key) =>
+                    !["_id", "title", "description", "price", "image", "images"].includes(key) && (
+                      <p key={key}>
+                        <span className="font-bold text-[#B22222]">{key}:</span> {modal[key]}
+                      </p>
+                    )
                 )}
               </div>
 
+              {/* ACTION BUTTONS */}
               <div className="flex gap-4 mt-auto">
                 <button
                   onClick={() => handleAddToCart(modal)}
