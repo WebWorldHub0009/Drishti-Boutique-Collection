@@ -11,8 +11,12 @@ export default function HeroAdmin() {
     const [editingId, setEditingId] = useState(null);
 
     const fetchSlides = async () => {
-        const { data } = await axios.get(API_URL);
-        setSlides(data);
+        try {
+            const { data } = await axios.get(API_URL);
+            setSlides(data);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     useEffect(() => {
@@ -25,22 +29,14 @@ export default function HeroAdmin() {
         formData.append("title", form.title);
         formData.append("desc", form.desc);
         formData.append("extra", form.extra);
-
-        // Only send offers with text + discount
-        const validOffers = offers.filter(o => o.text && o.discount);
-        formData.append("offers", JSON.stringify(validOffers));
-
+        formData.append("offers", JSON.stringify(offers.filter(o => o.text && o.discount)));
         if (imageFile) formData.append("image", imageFile);
 
         try {
             if (editingId) {
-                await axios.put(`${API_URL}/${editingId}`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+                await axios.put(`${API_URL}/${editingId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
             } else {
-                await axios.post(API_URL, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+                await axios.post(API_URL, formData, { headers: { "Content-Type": "multipart/form-data" } });
             }
             setForm({ title: "", desc: "", extra: "" });
             setOffers([{ text: "", discount: "" }]);
@@ -55,7 +51,7 @@ export default function HeroAdmin() {
 
     const handleEdit = (slide) => {
         setForm({ title: slide.title, desc: slide.desc, extra: slide.extra });
-        setOffers(slide.offers?.length ? slide.offers : [{ text: "", discount: "" }]);
+        setOffers(slide.offers.length ? slide.offers : [{ text: "", discount: "" }]);
         setEditingId(slide._id);
     };
 
@@ -67,29 +63,29 @@ export default function HeroAdmin() {
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">Hero Section Management</h2>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">Hero Management</h2>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-md mb-8 grid gap-4 md:grid-cols-2">
                 <input type="text" placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="border p-2 rounded-md w-full" required />
                 <input type="text" placeholder="Description" value={form.desc} onChange={e => setForm({ ...form, desc: e.target.value })} className="border p-2 rounded-md w-full" required />
-                <input type="text" placeholder="Extra Line" value={form.extra} onChange={e => setForm({ ...form, extra: e.target.value })} className="border p-2 rounded-md w-full" />
+                <input type="text" placeholder="Extra" value={form.extra} onChange={e => setForm({ ...form, extra: e.target.value })} className="border p-2 rounded-md w-full" />
 
-                {/* Offers Section */}
+                {/* Offers */}
                 <div className="md:col-span-2">
                     <h3 className="text-lg font-semibold mb-2">Offers</h3>
-                    {offers.map((offer, idx) => (
+                    {offers.map((o, idx) => (
                         <div key={idx} className="flex gap-2 mb-2">
-                            <input type="text" placeholder="Offer Text" value={offer.text} onChange={e => { const newOffers = [...offers]; newOffers[idx].text = e.target.value; setOffers(newOffers); }} className="border p-2 rounded-md w-full" />
-                            <input type="text" placeholder="Discount (e.g. 30% OFF)" value={offer.discount} onChange={e => { const newOffers = [...offers]; newOffers[idx].discount = e.target.value; setOffers(newOffers); }} className="border p-2 rounded-md w-40" />
+                            <input placeholder="Text" value={o.text} onChange={e => { const arr = [...offers]; arr[idx].text = e.target.value; setOffers(arr); }} className="border p-2 rounded-md w-full" />
+                            <input placeholder="Discount" value={o.discount} onChange={e => { const arr = [...offers]; arr[idx].discount = e.target.value; setOffers(arr); }} className="border p-2 rounded-md w-40" />
                             <button type="button" onClick={() => setOffers(offers.filter((_, i) => i !== idx))} className="bg-red-500 text-white px-2 rounded">✕</button>
                         </div>
                     ))}
-                    <button type="button" onClick={() => setOffers([...offers, { text: "", discount: "" }])} className="bg-green-500 text-white px-3 py-1 rounded-md mt-1">+ Add Offer</button>
+                    <button type="button" onClick={() => setOffers([...offers, { text: "", discount: "" }])} className="bg-green-500 text-white px-3 py-1 rounded-md">+ Add</button>
                 </div>
 
-                <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} className="border p-2 rounded-md w-full md:col-span-2" required={!editingId} />
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition md:col-span-2">{editingId ? "Update Slide" : "Add Slide"}</button>
+                <input type="file" onChange={e => setImageFile(e.target.files[0])} className="border p-2 rounded-md w-full md:col-span-2" required={!editingId} />
+                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md md:col-span-2">{editingId ? "Update" : "Add"}</button>
             </form>
 
             {/* Slides Table */}
@@ -99,7 +95,7 @@ export default function HeroAdmin() {
                         <tr>
                             <th className="p-3 border">Image</th>
                             <th className="p-3 border">Title</th>
-                            <th className="p-3 border">Description</th>
+                            <th className="p-3 border">Desc</th>
                             <th className="p-3 border">Extra</th>
                             <th className="p-3 border">Offers</th>
                             <th className="p-3 border text-center">Actions</th>
@@ -113,15 +109,11 @@ export default function HeroAdmin() {
                                 <td className="p-3 border">{slide.desc}</td>
                                 <td className="p-3 border">{slide.extra}</td>
                                 <td className="p-3 border">
-                                    {slide.offers?.map((offer, i) => (
-                                        <div key={i} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded mb-1 font-semibold">
-                                            {offer.text} - {offer.discount}
-                                        </div>
-                                    ))}
+                                    {slide.offers?.map((o, i) => <div key={i} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded mb-1 font-semibold">{o.text} - {o.discount}</div>)}
                                 </td>
                                 <td className="p-3 border text-center space-x-2">
-                                    <button onClick={() => handleEdit(slide)} className="bg-yellow-400 px-3 py-1 rounded-md text-white hover:bg-yellow-500">Edit</button>
-                                    <button onClick={() => handleDelete(slide._id)} className="bg-red-500 px-3 py-1 rounded-md text-white hover:bg-red-600">Delete</button>
+                                    <button onClick={() => handleEdit(slide)} className="bg-yellow-400 px-3 py-1 rounded-md text-white">Edit</button>
+                                    <button onClick={() => handleDelete(slide._id)} className="bg-red-500 px-3 py-1 rounded-md text-white">Delete</button>
                                 </td>
                             </tr>
                         ))}
