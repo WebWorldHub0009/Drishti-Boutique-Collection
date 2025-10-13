@@ -22,49 +22,37 @@ export default function HeroSection() {
     return () => clearInterval(timer);
   }, [slides]);
 
-  if (!slides.length) return <div className="text-center py-20 text-gray-500">Loading slides...</div>;
+  if (!slides.length) {
+    return <div className="text-center py-20 text-gray-500">Loading slides...</div>;
+  }
 
   return (
     <section className="relative w-full h-[90vh] md:h-screen overflow-hidden font-libre">
       {slides.map((slide, idx) => (
         <div
           key={idx}
-          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${current === idx ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
+          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${current === idx ? "opacity-100 z-10" : "opacity-0 z-0"}`}
         >
           <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/40 to-black/60" />
 
+          {/* Watermark */}
           <div className="absolute top-4 right-4 z-20 pointer-events-none">
             <img src={logoWatermark} alt="Watermark" className="w-28 md:w-36 opacity-50" />
           </div>
 
-          <div className="absolute inset-0 flex items-center justify-center text-center px-4 z-30">
+          {/* Slide Text */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 z-30">
             <div className="max-w-3xl text-white">
-              <h1 className="text-4xl sm:text-6xl md:text-7xl font-[Playfair_Display] font-extrabold text-[#D4AF37] mb-4 drop-shadow-lg">
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-[Playfair_Display] font-extrabold text-[#D4AF37] mb-4 drop-shadow-[3px_3px_6px_rgba(0,0,0,0.7)]">
                 {slide.title}
               </h1>
               <p className="text-lg sm:text-2xl md:text-3xl text-[#FAFAF0]/90 font-light mb-2 drop-shadow-md">
                 {slide.desc}
               </p>
-              <p className="text-sm sm:text-lg md:text-xl text-[#FAFAF0]/80 mb-4 italic drop-shadow-sm">
+              <p className="text-sm sm:text-lg md:text-xl text-[#FAFAF0]/80 mb-6 italic drop-shadow-sm">
                 {slide.extra}
               </p>
-
-              {/* Offers Display */}
-              {slide.offers?.length > 0 && (
-                <div className="absolute top-6 left-6 flex flex-col gap-2 z-40">
-                  {slide.offers.map((offer, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black font-semibold px-4 py-2 rounded-full shadow-lg transform hover:scale-105 transition-all"
-                    >
-                      {offer.text} - {offer.discount}
-                    </div>
-                  ))}
-                </div>
-              )}
-
 
               <Link
                 to="/royal-pick"
@@ -72,11 +60,25 @@ export default function HeroSection() {
               >
                 Explore Collection
               </Link>
+
+              {/* Offers Badges */}
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                {slide.offers?.map((offer, i) => (
+                  <div
+                    key={i}
+                    className="bg-yellow-400 text-black px-4 py-2 rounded-full font-bold animate-bounce hover:scale-110 transition-all shadow-lg"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                  >
+                    {offer.text} - {offer.discount}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       ))}
 
+      {/* Navigation Arrows */}
       <div className="absolute bottom-6 right-6 flex gap-3 z-40">
         <button
           onClick={() => setCurrent((prev) => (prev - 1 + slides.length) % slides.length)}
