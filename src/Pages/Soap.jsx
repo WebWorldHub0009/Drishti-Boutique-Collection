@@ -1,27 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import HeroBG from "../assets/images/gallery/bg.jpg"; // Hero background image
 import { FaShoppingCart, FaWhatsapp } from "react-icons/fa";
 import { buyNow } from "../utils/order";
 import { baseUrls } from "../baseUrls";
 
-// Swiper imports
+// Swiper imports for Vite + Swiper v8+
 import { Swiper, SwiperSlide } from "swiper/react";
-import SwiperCore, { Navigation, Pagination } from "swiper";
+import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
-// Hero background
-import HeroBG from "../assets/images/gallery/bg.jpg";
-
-SwiperCore.use([Navigation, Pagination]);
 
 const SoapPage = ({ addToCart, category = "soap", title = "Soaps" }) => {
   const [soaps, setSoaps] = useState([]);
   const [modal, setModal] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const sectionRef = useRef(null);
+  const navigate = useNavigate();
 
+  // Fetch dynamic data
   useEffect(() => {
     fetch(`${baseUrls}/api/beauty/${category}`)
       .then((res) => res.json())
@@ -111,7 +110,7 @@ const SoapPage = ({ addToCart, category = "soap", title = "Soaps" }) => {
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3] flex items-center justify-center">
                 <img
-                  src={item.image || item.images?.[0]}
+                  src={item.image}
                   alt={item.title}
                   className="max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
                 />
@@ -149,7 +148,7 @@ const SoapPage = ({ addToCart, category = "soap", title = "Soaps" }) => {
         </div>
       </section>
 
-      {/* DYNAMIC MODAL WITH MULTIPLE IMAGES */}
+      {/* DYNAMIC MODAL WITH MULTI-IMAGE SWIPER */}
       {modal && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
@@ -170,10 +169,12 @@ const SoapPage = ({ addToCart, category = "soap", title = "Soaps" }) => {
               &times;
             </button>
 
-            <div className="w-full md:w-1/2 h-[40vh] md:h-full bg-[#f7f5f0] flex items-center justify-center">
+            {/* Swiper for multiple images */}
+            <div className="w-full md:w-1/2 h-[40vh] md:h-full flex items-center justify-center bg-[#f7f5f0]">
               <Swiper
-                navigation
+                navigation={true}
                 pagination={{ clickable: true }}
+                modules={[Navigation, Pagination]}
                 className="h-full w-full"
               >
                 {(modal.images || [modal.image]).map((img, idx) => (
@@ -225,14 +226,11 @@ const SoapPage = ({ addToCart, category = "soap", title = "Soaps" }) => {
               {/* Dynamic Fields */}
               <div className="space-y-4 text-sm md:text-base text-[#333] font-medium leading-relaxed mt-auto">
                 {Object.entries(modal)
-                  .filter(
-                    ([key, value]) =>
-                      value && !["_id", "title", "description", "price", "image", "images"].includes(key)
-                  )
+                  .filter(([key, value]) => value && !["_id", "title", "description", "price", "image", "images"].includes(key))
                   .map(([key, value]) => (
                     <p key={key}>
                       <span className="font-bold text-[#B22222]">
-                        {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}:
+                        {key.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())}:
                       </span>{" "}
                       {value}
                     </p>
