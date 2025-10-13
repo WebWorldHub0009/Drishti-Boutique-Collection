@@ -53,14 +53,18 @@ export default function HeroSection() {
 
               {/* Offers Display */}
               {slide.offers?.length > 0 && (
-                <div className="mb-6 space-y-1">
+                <div className="absolute top-6 left-6 flex flex-col gap-2 z-40">
                   {slide.offers.map((offer, idx) => (
-                    <p key={idx} className="text-sm sm:text-base md:text-lg text-[#FFD700]/90 font-semibold">
+                    <div
+                      key={idx}
+                      className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black font-semibold px-4 py-2 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                    >
                       {offer.text} - {offer.discount}
-                    </p>
+                    </div>
                   ))}
                 </div>
               )}
+
 
               <Link
                 to="/royal-pick"
