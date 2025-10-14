@@ -10,6 +10,7 @@ import { baseUrls } from "../baseUrls";
 export default function DesignerSuit({ addToCart, category = "dress", title = "Designer Dresses" }) {
   const [suits, setSuits] = useState([]);
   const [modal, setModal] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const sectionRef = useRef(null);
   const navigate = useNavigate();
@@ -17,12 +18,18 @@ export default function DesignerSuit({ addToCart, category = "dress", title = "D
   useEffect(() => {
     axios
       .get(`${baseUrls}/api/collection/${category}`)
-      .then((res) => setSuits(res.data))
+      .then((res) =>
+        setSuits(
+          res.data.map((item) => ({
+            ...item,
+            images: item.images?.length ? item.images : item.image ? [item.image] : [],
+          }))
+        )
+      )
       .catch((err) => console.error(err));
   }, [category]);
 
-  const scrollToSection = () =>
-    sectionRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToSection = () => sectionRef.current?.scrollIntoView({ behavior: "smooth" });
 
   const handleAddToCart = (item) => {
     if (addToCart) addToCart(item);
@@ -30,14 +37,20 @@ export default function DesignerSuit({ addToCart, category = "dress", title = "D
     setTimeout(() => setShowToast(false), 2000);
   };
 
-  // Generic Buy Now → Save order
   const handleBuyNow = async (item) => {
     const result = await buyNow(item, "Guest");
-    if (result.success) {
-      alert("Order placed successfully!");
-    } else {
-      alert("Failed: " + result.message);
-    }
+    if (result.success) alert("Order placed successfully!");
+    else alert("Failed: " + result.message);
+  };
+
+  const handlePrevImage = () => {
+    if (!modal?.images?.length) return;
+    setActiveImageIndex((prev) => (prev === 0 ? modal.images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    if (!modal?.images?.length) return;
+    setActiveImageIndex((prev) => (prev === modal.images.length - 1 ? 0 : prev + 1));
   };
 
   return (
@@ -67,15 +80,13 @@ export default function DesignerSuit({ addToCart, category = "dress", title = "D
         </div>
       </section>
 
-      {/* GALLERY SECTION */}
+      {/* GALLERY */}
       <section
         ref={sectionRef}
         className="py-16 px-4 md:px-12 bg-gradient-to-b from-[#fff9f5] via-[#fff4ea] to-[#ffeedd]"
       >
         <div className="text-center mb-14">
-          <h2 className="text-5xl font-[Great_Vibes] text-[#B22222] mb-3">
-            Elegance in Every Stitch
-          </h2>
+          <h2 className="text-5xl font-[Great_Vibes] text-[#B22222] mb-3">Elegance in Every Stitch</h2>
           <p className="text-[#5A3E36] text-lg italic max-w-xl mx-auto">
             "Each piece is a celebration of heritage, artistry, and grace."
           </p>
@@ -87,11 +98,14 @@ export default function DesignerSuit({ addToCart, category = "dress", title = "D
             <div
               key={item._id}
               className="rounded-3xl overflow-hidden bg-white shadow-lg border border-[#e6c17b] group relative cursor-pointer hover:shadow-2xl hover:-translate-y-3 transition-all duration-500"
-              onClick={() => setModal(item)}
+              onClick={() => {
+                setModal(item);
+                setActiveImageIndex(0);
+              }}
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3]">
                 <img
-                  src={item.image}
+                  src={item.images[0]}
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
@@ -115,18 +129,14 @@ export default function DesignerSuit({ addToCart, category = "dress", title = "D
                   </p>
                 </div>
 
-                {item.price && (
-                  <p className="text-base font-semibold text-[#B22222] mt-2">
-                    ₹{item.price}
-                  </p>
-                )}
+                {item.price && <p className="text-base font-semibold text-[#B22222] mt-2">₹{item.price}</p>}
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* DYNAMIC MODAL */}
+      {/* MODAL */}
       {modal && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
@@ -143,22 +153,54 @@ export default function DesignerSuit({ addToCart, category = "dress", title = "D
               ×
             </button>
 
-            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2]">
-              <img
-                src={modal.image}
-                alt={modal.title}
-                className="w-full h-full object-contain"
-              />
+            {/* LEFT: Image Carousel */}
+            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex flex-col items-center justify-center">
+              {modal.images.length > 0 && (
+                <>
+                  <div className="relative h-full flex items-center justify-center">
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-[#B22222] font-bold rounded-full p-3 z-10 shadow-md"
+                    >
+                      ‹
+                    </button>
+                    <img
+                      src={modal.images[activeImageIndex]}
+                      alt={`${modal.title}-${activeImageIndex}`}
+                      className="w-full h-full object-contain transition-transform duration-700 ease-in-out"
+                    />
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-[#B22222] font-bold rounded-full p-3 z-10 shadow-md"
+                    >
+                      ›
+                    </button>
+                  </div>
+
+                  {/* Thumbnails */}
+                  <div className="flex gap-2 justify-center py-3 bg-[#fffaf0]/80 backdrop-blur-sm overflow-x-auto">
+                    {modal.images.map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={img}
+                        alt=""
+                        className={`w-14 h-14 object-cover rounded-lg cursor-pointer border-2 transition-all ${idx === activeImageIndex ? "border-[#B22222] scale-105" : "border-transparent opacity-70 hover:opacity-100"
+                          }`}
+                        onClick={() => setActiveImageIndex(idx)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
+            {/* RIGHT: Details */}
             <div className="w-full md:w-1/2 h-full p-8 flex flex-col overflow-y-auto hide-scrollbar bg-[#fffaf5]">
               <h2 className="text-3xl font-bold text-[#B22222] mb-3">{modal.title}</h2>
               <div className="w-20 h-1 bg-[#FFD700] rounded-full mb-5"></div>
               <p className="text-base text-[#555] mb-6">{modal.description}</p>
 
-              {modal.price && (
-                <p className="text-2xl font-bold text-[#B22222] mb-6">Price: ₹{modal.price}</p>
-              )}
+              {modal.price && <p className="text-2xl font-bold text-[#B22222] mb-6">Price: ₹{modal.price}</p>}
 
               <a
                 href="https://www.whatsapp.com/catalog/919811676755/?app_absent=0"
@@ -169,7 +211,7 @@ export default function DesignerSuit({ addToCart, category = "dress", title = "D
                 <FaWhatsapp className="text-xl" /> Book Now on WhatsApp
               </a>
 
-              {/* Dynamic Fields */}
+              {/* Dynamic Info */}
               <div className="space-y-3 text-sm text-[#333] font-medium mb-6">
                 {modal.fabric && <p><span className="font-bold text-[#B22222]">Fabric Type:</span> {modal.fabric}</p>}
                 {modal.work && <p><span className="font-bold text-[#B22222]">Work Detailing:</span> {modal.work}</p>}
