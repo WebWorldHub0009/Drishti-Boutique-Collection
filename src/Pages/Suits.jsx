@@ -4,38 +4,53 @@ import axios from "axios";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import HeroBG from "../assets/images/gallery/bg.jpg";
-import { buyNow } from "../utils/order.js";
-import { baseUrls } from "../baseUrls.js";
+import { buyNow } from "../utils/order";
+import { baseUrls } from "../baseUrls";
 
-export default function ProductGallery({ category = "suit", title = "Collection", addToCart }) {
+export default function SuitGallery({ addToCart, category = "suit", title = "Suits Collection" }) {
   const [products, setProducts] = useState([]);
   const [modal, setModal] = useState(null);
-  const [activeImage, setActiveImage] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const sectionRef = useRef(null);
   const navigate = useNavigate();
 
+  // Fetch products
   useEffect(() => {
     axios
       .get(`${baseUrls}/api/collection/${category}`)
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error(err));
+      .then(res => {
+        const normalized = res.data.map(item => ({
+          ...item,
+          images: item.images?.length ? item.images : item.image ? [item.image] : [],
+        }));
+        setProducts(normalized);
+      })
+      .catch(err => console.error(err));
   }, [category]);
 
-  const scrollToSection = () =>
-    sectionRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToSection = () => sectionRef.current?.scrollIntoView({ behavior: "smooth" });
 
-  const handleAddToCart = (item) => {
+  const handleAddToCart = item => {
     if (addToCart) addToCart(item);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
   };
 
-  const handleBuyNow = async (item) => {
-    if (addToCart) addToCart(item);
+  const handleBuyNow = async item => {
     const result = await buyNow(item, "Guest");
     if (result.success) alert("Order placed successfully!");
     else alert("Failed: " + result.message);
+  };
+
+  const handlePrevImage = () => {
+    if (!modal?.images?.length) return;
+    setActiveImageIndex(prev => (prev === 0 ? modal.images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    if (!modal?.images?.length) return;
+    setActiveImageIndex(prev => (prev === modal.images.length - 1 ? 0 : prev + 1));
   };
 
   return (
@@ -81,25 +96,26 @@ export default function ProductGallery({ category = "suit", title = "Collection"
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {products.map((item) => (
+          {products.map(item => (
             <div
               key={item._id}
               className="rounded-3xl overflow-hidden bg-white shadow-lg border border-[#e6c17b] group relative cursor-pointer hover:shadow-2xl hover:-translate-y-3 transition-all duration-500"
-              onClick={() => { setModal(item); setActiveImage(0); }}
+              onClick={() => { setModal(item); setActiveImageIndex(0); }}
             >
               <div className="relative overflow-hidden h-64 bg-[#fffaf3]">
                 <img
-                  src={item.images?.[0] || item.image}
+                  src={item.images[0] || ""}
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
                 <div
-                  onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}
+                  onClick={e => { e.stopPropagation(); handleAddToCart(item); }}
                   className="absolute top-4 right-4 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300"
                 >
                   <FiShoppingCart size={20} />
                 </div>
               </div>
+
               <div className="px-2 py-2 flex flex-col justify-between h-[140px]">
                 <div>
                   <h3 className="text-lg font-bold text-[#B22222] mb-1">{item.title}</h3>
@@ -122,80 +138,109 @@ export default function ProductGallery({ category = "suit", title = "Collection"
       {/* MODAL */}
       {modal && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4 animate-fadeIn"
           onClick={() => setModal(null)}
         >
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white w-full max-w-[90vw] md:max-w-[70vw] lg:max-w-[65vw] h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative border border-[#e6c17b]"
+            onClick={e => e.stopPropagation()}
+            className="relative bg-gradient-to-br from-[#fffaf3] via-[#fff8ee] to-[#fff0dd] w-full max-w-[90vw] md:max-w-[70vw] lg:max-w-[65vw] h-[90vh] rounded-[2rem] overflow-hidden shadow-[0_0_30px_rgba(255,215,0,0.3)] flex flex-col md:flex-row border-[3px] border-[#FFD700]/50 transform scale-95 hover:scale-100 transition-all duration-300 ease-out"
           >
             <button
               onClick={() => setModal(null)}
-              className="absolute top-4 right-4 text-[#B22222] text-4xl font-bold hover:text-[#98131f] z-20"
+              className="absolute top-4 right-4 text-[#B22222] text-4xl font-bold hover:text-[#98131f] z-20 transition-transform hover:rotate-90"
             >
               ×
             </button>
 
-            {/* IMAGE CAROUSEL WITH THUMBNAILS */}
+            {/* LEFT: Image Carousel */}
             <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex flex-col items-center justify-center">
-              <img
-                src={modal.images?.[activeImage] || modal.image}
-                alt={modal.title}
-                className="w-full h-full object-contain"
-              />
-              {modal.images?.length > 1 && (
-                <div className="flex gap-2 mt-4 overflow-x-auto px-4">
-                  {modal.images.map((img, i) => (
+              {modal.images.length > 0 && (
+                <>
+                  <div className="relative h-full flex items-center justify-center">
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-[#B22222] font-bold rounded-full p-3 z-10 shadow-md"
+                    >
+                      ‹
+                    </button>
                     <img
-                      key={i}
-                      src={img}
-                      alt={`thumb-${i}`}
-                      onClick={() => setActiveImage(i)}
-                      className={`h-16 w-16 object-cover rounded-md cursor-pointer border-2 ${activeImage === i ? "border-[#B22222]" : "border-transparent hover:border-[#FFD700]"}`}
+                      src={modal.images[activeImageIndex]}
+                      alt={`${modal.title}-${activeImageIndex}`}
+                      className="w-full h-full object-contain transition-transform duration-700 ease-in-out"
                     />
-                  ))}
-                </div>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-[#B22222] font-bold rounded-full p-3 z-10 shadow-md"
+                    >
+                      ›
+                    </button>
+                  </div>
+
+                  {/* Thumbnail Previews */}
+                  <div className="flex gap-2 justify-center py-3 bg-[#fffaf0]/80 backdrop-blur-sm overflow-x-auto">
+                    {modal.images.map((img, index) => (
+                      <img
+                        key={index}
+                        src={img}
+                        alt=""
+                        className={`w-14 h-14 object-cover rounded-lg cursor-pointer border-2 transition-all ${index === activeImageIndex ? "border-[#B22222] scale-105" : "border-transparent opacity-70 hover:opacity-100"}`}
+                        onClick={() => setActiveImageIndex(index)}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 
-            {/* DETAILS */}
-            <div className="w-full md:w-1/2 h-full p-8 flex flex-col overflow-y-auto hide-scrollbar bg-[#fffaf5]">
-              <h2 className="text-3xl font-bold text-[#B22222] mb-3">{modal.title}</h2>
+            {/* RIGHT: Details Section */}
+            <div className="w-full md:w-1/2 h-full p-8 flex flex-col overflow-y-auto hide-scrollbar bg-gradient-to-b from-[#fffaf5] to-[#ffefe1] relative">
+              <h2 className="text-3xl font-[Great_Vibes] text-[#B22222] mb-2 drop-shadow-sm">
+                {modal.title}
+              </h2>
               <div className="w-20 h-1 bg-[#FFD700] rounded-full mb-5"></div>
-              <p className="text-base text-[#555] mb-6">{modal.description}</p>
+              <p className="text-base text-[#555] mb-6 leading-relaxed italic">
+                {modal.description}
+              </p>
+
               {modal.price && (
-                <p className="text-2xl font-bold text-[#B22222] mb-6">Price: ₹{modal.price}</p>
+                <p className="text-2xl font-bold text-[#B22222] mb-6">
+                  Price: ₹{modal.price}
+                </p>
               )}
+
               <a
                 href="https://www.whatsapp.com/catalog/919811676755/?app_absent=0"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-base font-bold text-white bg-gradient-to-r from-[#B22222] to-[#FFD700] px-6 py-3 rounded-full mb-6 hover:from-[#98131f] hover:to-[#f0c243] transition"
+                className="flex items-center justify-center gap-2 text-base font-bold text-white bg-gradient-to-r from-[#B22222] to-[#FFD700] px-6 py-3 rounded-full mb-6 hover:from-[#98131f] hover:to-[#f0c243] transition-all shadow-lg"
               >
                 <FaWhatsapp className="text-xl" /> Book Now on WhatsApp
               </a>
 
+              {/* Dynamic Info */}
               <div className="space-y-3 text-sm text-[#333] font-medium mb-6">
                 {Object.keys(modal).map(
-                  (key) =>
+                  key =>
                     !["_id", "title", "description", "price", "image", "images"].includes(key) && (
                       <p key={key}>
-                        <span className="font-bold text-[#B22222]">{key}:</span> {modal[key]}
+                        <span className="font-bold text-[#B22222] capitalize">{key}:</span>{" "}
+                        {modal[key]}
                       </p>
                     )
                 )}
               </div>
 
+              {/* Action Buttons */}
               <div className="flex gap-4 mt-auto">
                 <button
                   onClick={() => handleAddToCart(modal)}
-                  className="flex-1 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white px-6 py-3 rounded-full font-bold hover:from-[#98131f] hover:to-[#f0c243] transition"
+                  className="flex-1 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white px-6 py-3 rounded-full font-bold hover:from-[#98131f] hover:to-[#f0c243] transition-all shadow-md"
                 >
                   Add to Cart
                 </button>
                 <button
                   onClick={() => handleBuyNow(modal)}
-                  className="flex-1 bg-[#FFD700] text-[#B22222] px-6 py-3 rounded-full font-bold hover:bg-[#f0c243] transition"
+                  className="flex-1 bg-[#FFD700] text-[#B22222] px-6 py-3 rounded-full font-bold hover:bg-[#f0c243] transition-all shadow-md"
                 >
                   Buy Now
                 </button>
