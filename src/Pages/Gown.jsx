@@ -143,83 +143,114 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
       {/* MODAL WITH MULTIPLE IMAGES */}
       {modal && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4 animate-fadeIn"
           onClick={() => setModal(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white w-full max-w-[90vw] md:max-w-[70vw] lg:max-w-[65vw] h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative border border-[#e6c17b]"
+            className="relative bg-gradient-to-br from-[#fffaf3] via-[#fff8ee] to-[#fff0dd] w-full max-w-[90vw] md:max-w-[70vw] lg:max-w-[65vw] h-[90vh] rounded-[2rem] overflow-hidden shadow-[0_0_30px_rgba(255,215,0,0.3)] flex flex-col md:flex-row border-[3px] border-[#FFD700]/50 transform scale-95 hover:scale-100 transition-all duration-300 ease-out"
           >
+            {/* Close Button */}
             <button
               onClick={() => setModal(null)}
-              className="absolute top-4 right-4 text-[#B22222] text-4xl font-bold hover:text-[#98131f] z-20"
+              className="absolute top-4 right-4 text-[#B22222] text-4xl font-bold hover:text-[#98131f] z-20 transition-transform hover:rotate-90"
             >
               ×
             </button>
 
-            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex items-center justify-center">
+            {/* LEFT: Image Section */}
+            <div className="w-full md:w-1/2 h-[40vh] md:h-full relative bg-[#faf7f2] flex flex-col items-center justify-center">
               {modal.images.length > 0 && (
                 <>
-                  <button
-                    onClick={handlePrevImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 hover:bg-white"
-                  >
-                    ‹
-                  </button>
-                  <img
-                    src={modal.images[activeImageIndex]}
-                    alt={`${modal.title}-${activeImageIndex}`}
-                    className="w-full h-full object-contain"
-                  />
-                  <button
-                    onClick={handleNextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 hover:bg-white"
-                  >
-                    ›
-                  </button>
+                  {/* Main Image */}
+                  <div className="relative h-full flex items-center justify-center">
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-[#B22222] font-bold rounded-full p-3 z-10 shadow-md"
+                    >
+                      ‹
+                    </button>
+                    <img
+                      src={modal.images[activeImageIndex]}
+                      alt={`${modal.title}-${activeImageIndex}`}
+                      className="w-full h-full object-contain transition-transform duration-700 ease-in-out"
+                    />
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-[#B22222] font-bold rounded-full p-3 z-10 shadow-md"
+                    >
+                      ›
+                    </button>
+                  </div>
+
+                  {/* Thumbnail Previews */}
+                  <div className="flex gap-2 justify-center py-3 bg-[#fffaf0]/80 backdrop-blur-sm">
+                    {modal.images.map((img, index) => (
+                      <img
+                        key={index}
+                        src={img}
+                        alt=""
+                        className={`w-14 h-14 object-cover rounded-lg cursor-pointer border-2 transition-all ${index === activeImageIndex
+                            ? "border-[#B22222] scale-105"
+                            : "border-transparent opacity-70 hover:opacity-100"
+                          }`}
+                        onClick={() => setActiveImageIndex(index)}
+                      />
+                    ))}
+                  </div>
                 </>
               )}
             </div>
 
-            <div className="w-full md:w-1/2 h-full p-8 flex flex-col overflow-y-auto hide-scrollbar bg-[#fffaf5]">
-              <h2 className="text-3xl font-bold text-[#B22222] mb-3">{modal.title}</h2>
+            {/* RIGHT: Details Section */}
+            <div className="w-full md:w-1/2 h-full p-8 flex flex-col overflow-y-auto hide-scrollbar bg-gradient-to-b from-[#fffaf5] to-[#ffefe1] relative">
+              <h2 className="text-3xl font-[Great_Vibes] text-[#B22222] mb-2 drop-shadow-sm">
+                {modal.title}
+              </h2>
               <div className="w-20 h-1 bg-[#FFD700] rounded-full mb-5"></div>
-              <p className="text-base text-[#555] mb-6">{modal.description}</p>
+              <p className="text-base text-[#555] mb-6 leading-relaxed italic">
+                {modal.description}
+              </p>
+
               {modal.price && (
-                <p className="text-2xl font-bold text-[#B22222] mb-6">Price: ₹{modal.price}</p>
+                <p className="text-2xl font-bold text-[#B22222] mb-6">
+                  Price: ₹{modal.price}
+                </p>
               )}
+
               <a
                 href="https://www.whatsapp.com/catalog/919811676755/?app_absent=0"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-base font-bold text-white bg-gradient-to-r from-[#B22222] to-[#FFD700] px-6 py-3 rounded-full mb-6 hover:from-[#98131f] hover:to-[#f0c243] transition"
+                className="flex items-center justify-center gap-2 text-base font-bold text-white bg-gradient-to-r from-[#B22222] to-[#FFD700] px-6 py-3 rounded-full mb-6 hover:from-[#98131f] hover:to-[#f0c243] transition-all shadow-lg"
               >
                 <FaWhatsapp className="text-xl" /> Book Now on WhatsApp
               </a>
 
-              {/* Dynamic Fields */}
+              {/* Dynamic Info */}
               <div className="space-y-3 text-sm text-[#333] font-medium mb-6">
                 {Object.keys(modal).map(
                   key =>
                     !["_id", "title", "description", "price", "image", "images"].includes(key) && (
                       <p key={key}>
-                        <span className="font-bold text-[#B22222]">{key}:</span> {modal[key]}
+                        <span className="font-bold text-[#B22222] capitalize">{key}:</span>{" "}
+                        {modal[key]}
                       </p>
                     )
                 )}
               </div>
 
-              {/* ACTION BUTTONS */}
+              {/* Action Buttons */}
               <div className="flex gap-4 mt-auto">
                 <button
                   onClick={() => handleAddToCart(modal)}
-                  className="flex-1 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white px-6 py-3 rounded-full font-bold hover:from-[#98131f] hover:to-[#f0c243] transition"
+                  className="flex-1 bg-gradient-to-r from-[#B22222] to-[#FFD700] text-white px-6 py-3 rounded-full font-bold hover:from-[#98131f] hover:to-[#f0c243] transition-all shadow-md"
                 >
                   Add to Cart
                 </button>
                 <button
                   onClick={() => handleBuyNow(modal)}
-                  className="flex-1 bg-[#FFD700] text-[#B22222] px-6 py-3 rounded-full font-bold hover:bg-[#f0c243] transition"
+                  className="flex-1 bg-[#FFD700] text-[#B22222] px-6 py-3 rounded-full font-bold hover:bg-[#f0c243] transition-all shadow-md"
                 >
                   Buy Now
                 </button>
@@ -228,6 +259,7 @@ export default function DesignerGown({ addToCart, category = "gown", title = "De
           </div>
         </div>
       )}
+
 
       {/* TOAST */}
       {showToast && (
