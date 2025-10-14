@@ -29,6 +29,7 @@ import Checkout from './Pages/OrderForm';
 import Dupatta from './Pages/Dupatta';
 
 import Login from './Pages/Login';
+import ChangePassword from './Pages/ChangePassword';
 import Register from './Pages/Register';
 import AdminRoute from './Pages/AdminRoute';
 import AdminLayout from './Pages/AdminLayout';
@@ -94,7 +95,7 @@ function App() {
 
         {/* Auth */}
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/change-password" element={<ChangePassword />} />
 
         {/* Admin Routes */}
         <Route
