@@ -30,7 +30,6 @@ export default function AboutHero() {
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* WATERMARK TEXT */}
       <motion.h1
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[25vw] md:text-[14vw] font-extrabold text-white/5 select-none"
         animate={{ opacity: [0.5, 1, 0.5] }}
